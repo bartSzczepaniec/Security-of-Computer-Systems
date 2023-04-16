@@ -86,6 +86,8 @@ public class AppGUI {
                     // TODO - handle file
                     fileLabel.setText(chosenFile.getName());
                 }
+
+
             }
         });
 
@@ -106,6 +108,7 @@ public class AppGUI {
                 System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
                 sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent);
                 sendThread.start();
+
 
             }
         });

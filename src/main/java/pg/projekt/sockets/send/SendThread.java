@@ -1,6 +1,8 @@
 package pg.projekt.sockets.send;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import pg.projekt.sockets.messages.Message;
 
 import java.io.IOException;
@@ -12,6 +14,8 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 public class SendThread implements Runnable{
 
     private Thread worker;
@@ -53,10 +57,10 @@ public class SendThread implements Runnable{
     @Override
     public void run(){
         // read messages from socket until the ned
-        ObjectOutputStream out =null;
-        ObjectInputStream in = null;
-        while(true) {
 
+        while(true) {
+            ObjectOutputStream out =null;
+            ObjectInputStream in = null;
             try{
                 clientSocket = new Socket(address, port);
                 out = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -69,23 +73,23 @@ public class SendThread implements Runnable{
                         out.flush();
                         putMsgOnList(msg.getContent());
                     }
-
-
-
+                    if(clientSocket.isClosed()){
+                        throw new SocketException("Socket closed");
+                    }
                 }
 
             } catch (SocketException | NullPointerException ex)
             {
                 System.out.println("Socket closed by other side or no open socket present - communication terminated");
-                break;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
             } finally {
                 try {
                     out.close();
                     in.close();
                     clientSocket.close();
+                    System.out.println("Closing gently");
+                    break;
                 } catch (IOException | NullPointerException e) {
+                    System.out.println(e);
                     break;
                 }
             }
