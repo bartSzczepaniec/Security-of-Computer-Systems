@@ -38,6 +38,7 @@ public class SendThread implements Runnable{
         this.sentMsgList = msgList;
         this.messagesToSend = messagesToSend;
         this.clientSocket = null;
+        // TODO: add isRunning 
     }
 
     public void start(){

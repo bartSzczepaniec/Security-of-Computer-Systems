@@ -223,10 +223,14 @@ public class AppGUI {
                 int chosenPort = Integer.valueOf(portTextField.getText());
                 System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
                 sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent);
+                // TODO: implment is runniong in SendThread (also Receive)
                 sendThread.start();
-
                 connectButton.setEnabled(false);
                 disconnectButton.setEnabled(true);
+
+
+
+
             }
         });
 
