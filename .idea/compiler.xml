@@ -6,11 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="Security-of-Computer-Systems" />
         <module name="bsk" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="Security-of-Computer-Systems" target="1.7" />
-    </bytecodeTargetLevel>
   </component>
 </project>
