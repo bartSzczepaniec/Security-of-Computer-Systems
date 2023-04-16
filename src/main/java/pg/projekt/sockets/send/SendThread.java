@@ -1,6 +1,8 @@
 package pg.projekt.sockets.send;
 
 
+import lombok.Getter;
+import lombok.Setter;
 import pg.projekt.sockets.messages.Message;
 
 import java.io.IOException;
@@ -12,6 +14,8 @@ import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 public class SendThread implements Runnable{
 
     private Thread worker;
@@ -19,6 +23,8 @@ public class SendThread implements Runnable{
     private String address;
     private List<Message> sentMsgList;
     private List<Message> messagesToSend;
+
+    private Socket clientSocket;
     /**
      * creates new thread
      * @param address - the socket addres
@@ -31,6 +37,7 @@ public class SendThread implements Runnable{
         this.port = port;
         this.sentMsgList = msgList;
         this.messagesToSend = messagesToSend;
+        this.clientSocket = null;
     }
 
     public void start(){
@@ -43,18 +50,21 @@ public class SendThread implements Runnable{
      * @param msgConent - content of the message
      */
     public synchronized void putMsgOnList(String msgConent){
-        Message msg = new Message(msgConent, "sender");
+        Message msg = new Message(msgConent, address);
         this.sentMsgList.add(msg);
     }
 
     @Override
     public void run(){
         // read messages from socket until the ned
+
         while(true) {
-            try (Socket clientSocket = new Socket(address, port);
-                 ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-                 ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream()))
-            {
+            ObjectOutputStream out =null;
+            ObjectInputStream in = null;
+            try{
+                clientSocket = new Socket(address, port);
+                out = new ObjectOutputStream(clientSocket.getOutputStream());
+                in = new ObjectInputStream(clientSocket.getInputStream());
                 int counter =0;
                 while (true) {
                     if(messagesToSend.size() > 0){
@@ -63,17 +73,25 @@ public class SendThread implements Runnable{
                         out.flush();
                         putMsgOnList(msg.getContent());
                     }
-
-
-
+                    if(clientSocket.isClosed()){
+                        throw new SocketException("Socket closed");
+                    }
                 }
 
-            } catch (SocketException ex)
+            } catch (SocketException | NullPointerException ex)
             {
-                System.out.println("Socket closed by other side - communication terminated");
-                break;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                System.out.println("Socket closed by other side or no open socket present - communication terminated");
+            } finally {
+                try {
+                    out.close();
+                    in.close();
+                    clientSocket.close();
+                    System.out.println("Closing gently");
+                    break;
+                } catch (IOException | NullPointerException e) {
+                    System.out.println(e);
+                    break;
+                }
             }
 
         }
