@@ -190,6 +190,16 @@ public class AppGUI {
         }
     }
 
+    public void setConnectionButtons(boolean waitingToConnect){
+        if(waitingToConnect){
+            connectButton.setEnabled(true);
+            disconnectButton.setEnabled(false);
+        }else{
+            connectButton.setEnabled(false);
+            disconnectButton.setEnabled(true);
+        }
+
+    }
     private void setupButtons() {
         // Choosing a file to send
         fileChooseButton.addActionListener(new ActionListener() {
@@ -228,8 +238,17 @@ public class AppGUI {
                 // TODO: implment is runniong in SendThread (also Receive)
                 sendThread.start();
 
-                connectButton.setEnabled(false);
-                disconnectButton.setEnabled(true);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+                if(sendThread.getRunning().get()){
+                    setConnectionButtons(false);
+                }else{
+                    setConnectionButtons(true);
+                }
+
 
 
 
@@ -240,12 +259,23 @@ public class AppGUI {
         disconnectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                connectButton.setEnabled(true);
-                disconnectButton.setEnabled(false);
+
                 try {
+                    // close sockets
                     sendThread.getClientSocket().close();
-                } catch (IOException | NullPointerException ex ) {
-                    // TODO: running checks to prevent
+                    receiveThread.getClientSocket().close();
+                    receiveThread.getServerSocket().close();
+                    // wait for reciever thread to finish
+                    receiveThread.getWorker().join();
+
+                    // restart reciever thread - ready for new connections
+                    receiveThread.start();
+
+                    connectButton.setEnabled(true);
+                    disconnectButton.setEnabled(false);
+                    setConnectionButtons(true);
+
+                } catch (IOException | NullPointerException | InterruptedException ex) {
                     System.err.println("Closed not exisiting connection");
                 }
             }
