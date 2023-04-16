@@ -7,19 +7,17 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @Setter
 @EqualsAndHashCode
 @ToString
-public class RecieveThread implements Runnable{
+public class ReceiveThread implements Runnable{
     private ServerSocket serverSocket;
     private Thread worker;
 
-    private List<Message> recievedMsgList;
+    private List<Message> receivedMsgList;
     private int port;
 
     /**
@@ -27,11 +25,11 @@ public class RecieveThread implements Runnable{
      * @param msgList - a list to store recieved messages in (shared between reciever, sender and printer threads)
      * @param port - port number to create ServerSocket on
      */
-    public RecieveThread(List<Message> msgList, int port){
+    public ReceiveThread(List<Message> msgList, int port){
         this.serverSocket = null;
         this.port = port;
         this.worker = new Thread(this);
-        this.recievedMsgList = msgList;
+        this.receivedMsgList = msgList;
     }
 
     /**
@@ -40,10 +38,13 @@ public class RecieveThread implements Runnable{
     public void start(){
         try {
             serverSocket = new ServerSocket(port);
+            worker.start();
+            System.out.println("Reciever thread started (port: " + port +")");
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        worker.start();
+
 
     }
 
@@ -52,8 +53,8 @@ public class RecieveThread implements Runnable{
      * @param msgContent - content of message
      */
     public synchronized void putMsgOnList(String msgContent){
-        Message msg = new Message(msgContent, "reciever");
-        this.recievedMsgList.add(msg);
+        Message msg = new Message(msgContent, "receiver");
+        this.receivedMsgList.add(msg);
     }
 
 
@@ -87,6 +88,7 @@ public class RecieveThread implements Runnable{
 
         }
 
+        System.out.println("Receiver thread started (port: " + port +")");
 
     }
 

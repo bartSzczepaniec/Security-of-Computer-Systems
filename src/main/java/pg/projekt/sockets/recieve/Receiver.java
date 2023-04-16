@@ -5,22 +5,17 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import pg.projekt.sockets.messages.Message;
-import pg.projekt.sockets.messages.MsgReader;
 import pg.projekt.sockets.send.SendThread;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 
 @Getter
 @Setter
 @EqualsAndHashCode
 @ToString
-public class Reciever {
+public class Receiver {
 
 
     public static void main(String[] args){
@@ -35,14 +30,14 @@ public class Reciever {
             toBeSent.add(new Message("blabla3", "sender"));
             toBeSent.add(new Message("blabla4", "sender"));
 
-            RecieveThread t = new RecieveThread(msgList, port);
+            ReceiveThread t = new ReceiveThread(msgList, port);
             SendThread t2 = new SendThread("localhost", port+1, msgList, toBeSent);
-            MsgReader t3 = new MsgReader(msgList);
+            //MsgReader t3 = new MsgReader(msgList);
 
             t.start();
             Thread.sleep(100);
             t2.start();
-            t3.start();
+            //t3.start();
             System.out.println("Started");
             t.getWorker().join();
             Thread.sleep(5000);

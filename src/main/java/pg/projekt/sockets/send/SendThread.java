@@ -35,6 +35,7 @@ public class SendThread implements Runnable{
 
     public void start(){
         worker.start();
+        System.out.println("Sender thread started (addres: " + address + ", port: " + port +")");
     }
 
     /**
@@ -76,7 +77,6 @@ public class SendThread implements Runnable{
             }
 
         }
-        System.out.println("THREAD FINISHED");
-
+        System.out.println("Sender thread finished (addres: " + address + ", port: " + port +")");
     }
 }

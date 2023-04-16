@@ -2,19 +2,17 @@ package pg.projekt;
 
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MsgReader;
-import pg.projekt.sockets.recieve.RecieveThread;
+import pg.projekt.sockets.recieve.ReceiveThread;
 import pg.projekt.sockets.send.SendThread;
 
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 
 public class AppGUI {
     private JFrame frame;
@@ -39,7 +37,7 @@ public class AppGUI {
     private List<Message> msgList;
     private List<Message> toBeSent;
 
-    private RecieveThread recieveThread;
+    private ReceiveThread receiveThread;
     private SendThread sendThread;
     private MsgReader msgReader;
 
@@ -119,7 +117,7 @@ public class AppGUI {
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
-                    recieveThread.getServerSocket().close();
+                    receiveThread.getServerSocket().close();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -131,10 +129,10 @@ public class AppGUI {
         this.msgList = Collections.synchronizedList(new ArrayList<Message>());
         this.toBeSent = Collections.synchronizedList(new ArrayList<Message>());
 
-        this.recieveThread = new RecieveThread(msgList, 10000);
-        this.recieveThread.start();
+        this.receiveThread = new ReceiveThread(msgList, 10000);
+        this.receiveThread.start();
 
-        this.msgReader = new MsgReader(msgList);
+        this.msgReader = new MsgReader(msgList, messagesPane);
         this.msgReader.start();
     }
 
