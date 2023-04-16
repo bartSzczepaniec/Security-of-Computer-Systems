@@ -38,7 +38,7 @@ public class SendThread implements Runnable{
         this.sentMsgList = msgList;
         this.messagesToSend = messagesToSend;
         this.clientSocket = null;
-        // TODO: add isRunning 
+        // TODO: add isRunning
     }
 
     public void start(){
@@ -51,7 +51,7 @@ public class SendThread implements Runnable{
      * @param msgConent - content of the message
      */
     public synchronized void putMsgOnList(String msgConent){
-        Message msg = new Message(msgConent, address);
+        Message msg = new Message(msgConent, address+":"+port);
         this.sentMsgList.add(msg);
     }
 
@@ -68,6 +68,7 @@ public class SendThread implements Runnable{
                 in = new ObjectInputStream(clientSocket.getInputStream());
                 int counter =0;
                 while (true) {
+
                     if(messagesToSend.size() > 0){
                         Message msg = messagesToSend.remove(0);
                         out.writeObject(msg);
@@ -82,6 +83,7 @@ public class SendThread implements Runnable{
             } catch (SocketException | NullPointerException ex)
             {
                 System.out.println("Socket closed by other side or no open socket present - communication terminated");
+                System.out.println(ex);
             } finally {
                 try {
                     out.close();

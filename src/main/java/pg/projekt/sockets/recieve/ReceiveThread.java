@@ -61,6 +61,7 @@ public class ReceiveThread implements Runnable{
     @Override
     public void run(){
         while(true) {
+            // if user does not accept client socket closed
             try (Socket clientSocket = serverSocket.accept();
                  ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream()); // ev. for msg confirmation
                  ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream()))
@@ -88,7 +89,7 @@ public class ReceiveThread implements Runnable{
 
         }
 
-        System.out.println("Receiver thread started (port: " + port +")");
+        System.out.println("Receiver thread stopped (port: " + port +")");
 
     }
 

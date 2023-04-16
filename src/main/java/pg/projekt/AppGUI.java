@@ -218,6 +218,8 @@ public class AppGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 messagesPane.setText("");
+                msgList.removeAll(msgList);
+                toBeSent.removeAll(toBeSent);
 
                 String chosenIP = ipTextField.getText();
                 int chosenPort = Integer.valueOf(portTextField.getText());
@@ -225,6 +227,7 @@ public class AppGUI {
                 sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent);
                 // TODO: implment is runniong in SendThread (also Receive)
                 sendThread.start();
+
                 connectButton.setEnabled(false);
                 disconnectButton.setEnabled(true);
 
@@ -239,6 +242,12 @@ public class AppGUI {
             public void actionPerformed(ActionEvent e) {
                 connectButton.setEnabled(true);
                 disconnectButton.setEnabled(false);
+                try {
+                    sendThread.getClientSocket().close();
+                } catch (IOException | NullPointerException ex ) {
+                    // TODO: running checks to prevent
+                    System.err.println("Closed not exisiting connection");
+                }
             }
         });
     }
