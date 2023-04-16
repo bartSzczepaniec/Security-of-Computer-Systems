@@ -56,7 +56,6 @@ public class SendThread implements Runnable{
             {
                 int counter =0;
                 while (true) {
-                    Thread.sleep(500);
                     if(messagesToSend.size() > 0){
                         Message msg = messagesToSend.remove(0);
                         out.writeObject(msg);
@@ -72,7 +71,7 @@ public class SendThread implements Runnable{
             {
                 System.out.println("Socket closed by other side - communication terminated");
                 break;
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 

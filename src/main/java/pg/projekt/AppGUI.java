@@ -1,5 +1,10 @@
 package pg.projekt;
 
+import pg.projekt.sockets.messages.Message;
+import pg.projekt.sockets.messages.MsgReader;
+import pg.projekt.sockets.recieve.RecieveThread;
+import pg.projekt.sockets.send.SendThread;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +14,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Scanner;
 
 public class AppGUI {
@@ -30,6 +38,15 @@ public class AppGUI {
     private JFileChooser jFileChooser;
 
     private EncryptionManager encryptionManager;
+
+    private List<Message> msgList;
+    private List<Message> toBeSent;
+
+    private RecieveThread recieveThread;
+    private SendThread sendThread;
+    private MsgReader msgReader;
+
+
 
     public AppGUI() {
         frame = new JFrame("Security of Computer Systems");
@@ -90,9 +107,11 @@ public class AppGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String chosenIP = ipTextField.getText();
-                String chosenPort = portTextField.getText();
+                int chosenPort = Integer.valueOf(portTextField.getText());
                 System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
-                // TODO - handle connecting
+                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent);
+                sendThread.start();
+
             }
         });
 
@@ -101,6 +120,15 @@ public class AppGUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
+
+        this.msgList = Collections.synchronizedList(new ArrayList<Message>());
+        this.toBeSent = Collections.synchronizedList(new ArrayList<Message>());
+
+        this.recieveThread = new RecieveThread(msgList, 10000);
+        this.recieveThread.start();
+
+        this.msgReader = new MsgReader(msgList);
+        this.msgReader.start();
     }
 
     private void enterPassword() throws IOException {
@@ -155,7 +183,9 @@ public class AppGUI {
 
     public void sendMessage() {
         if(!sendMessageField.getText().isEmpty()) {
-            System.out.println("Message sent: " + sendMessageField.getText());
+            String msgToSend = sendMessageField.getText();
+            System.out.println("Message sent: " + msgToSend);
+            toBeSent.add(new Message(msgToSend, "test_sender"));
             sendMessageField.setText("");
             // TODO - handle sending message
         }
