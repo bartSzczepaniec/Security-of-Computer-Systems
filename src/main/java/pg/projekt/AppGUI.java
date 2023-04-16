@@ -6,10 +6,7 @@ import pg.projekt.sockets.recieve.RecieveThread;
 import pg.projekt.sockets.send.SendThread;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -118,6 +115,16 @@ public class AppGUI {
         frame.add(mainPanel);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try {
+                    recieveThread.getServerSocket().close();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
         frame.pack();
         frame.setVisible(true);
 
@@ -185,9 +192,8 @@ public class AppGUI {
         if(!sendMessageField.getText().isEmpty()) {
             String msgToSend = sendMessageField.getText();
             System.out.println("Message sent: " + msgToSend);
-            toBeSent.add(new Message(msgToSend, "test_sender"));
+            toBeSent.add(new Message(msgToSend, "test_sender")); // message sending
             sendMessageField.setText("");
-            // TODO - handle sending message
         }
     }
 
