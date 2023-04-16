@@ -3,6 +3,7 @@ package pg.projekt.sockets.send;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.checkerframework.checker.units.qual.A;
 import pg.projekt.sockets.messages.Message;
 
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @Setter
@@ -23,8 +25,8 @@ public class SendThread implements Runnable{
     private String address;
     private List<Message> sentMsgList;
     private List<Message> messagesToSend;
-
     private Socket clientSocket;
+    private AtomicBoolean running;
     /**
      * creates new thread
      * @param address - the socket addres
@@ -38,12 +40,13 @@ public class SendThread implements Runnable{
         this.sentMsgList = msgList;
         this.messagesToSend = messagesToSend;
         this.clientSocket = null;
-        // TODO: add isRunning
+        this.running = new AtomicBoolean(false);
     }
 
     public void start(){
         worker.start();
         System.out.println("Sender thread started (addres: " + address + ", port: " + port +")");
+        this.running.set(true);
     }
 
     /**
@@ -59,45 +62,44 @@ public class SendThread implements Runnable{
     public void run(){
         // read messages from socket until the ned
 
-        while(true) {
-            ObjectOutputStream out =null;
-            ObjectInputStream in = null;
-            try{
-                clientSocket = new Socket(address, port);
-                out = new ObjectOutputStream(clientSocket.getOutputStream());
-                in = new ObjectInputStream(clientSocket.getInputStream());
-                int counter =0;
-                while (true) {
+        ObjectOutputStream out =null;
+        ObjectInputStream in = null;
+        try{
+            clientSocket = new Socket(address, port);
+            out = new ObjectOutputStream(clientSocket.getOutputStream());
+            in = new ObjectInputStream(clientSocket.getInputStream());
 
-                    if(messagesToSend.size() > 0){
-                        Message msg = messagesToSend.remove(0);
-                        out.writeObject(msg);
-                        out.flush();
-                        putMsgOnList(msg.getContent());
-                    }
-                    if(clientSocket.isClosed()){
-                        throw new SocketException("Socket closed");
-                    }
+            while (true) {
+                if(messagesToSend.size() > 0){
+                    Message msg = messagesToSend.remove(0);
+                    out.writeObject(msg);
+                    out.flush();
+                    putMsgOnList(msg.getContent());
                 }
+                // check if there is any msg waiting and print every 0.2s
 
-            } catch (SocketException | NullPointerException ex)
-            {
-                System.out.println("Socket closed by other side or no open socket present - communication terminated");
-                System.out.println(ex);
-            } finally {
-                try {
-                    out.close();
-                    in.close();
-                    clientSocket.close();
-                    System.out.println("Closing gently");
-                    break;
-                } catch (IOException | NullPointerException e) {
-                    System.out.println(e);
+                Thread.sleep(200);
+                if(clientSocket.isClosed()){
                     break;
                 }
             }
 
+        } catch (NullPointerException | IOException | InterruptedException ex)
+        {
+            System.out.println("Socket closed by other side or no open socket present - communication terminated");
+            System.err.println(ex);
+        } finally {
+            try {
+                out.close();
+                in.close();
+                clientSocket.close();
+                System.out.println("Closing gently");
+            } catch (IOException | NullPointerException e) {
+                System.err.println(e);
+            }
         }
+
+        this.running.set(false);
         System.out.println("Sender thread finished (addres: " + address + ", port: " + port +")");
     }
 }

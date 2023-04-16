@@ -22,7 +22,7 @@ public class MsgReader implements Runnable{
         while(true){
 
             try {
-                Thread.sleep(2000);
+                Thread.sleep(200); // magical sleep, without doesnt work
 
                 for(Message s : msgList){
                     if(!s.isPrinted()){

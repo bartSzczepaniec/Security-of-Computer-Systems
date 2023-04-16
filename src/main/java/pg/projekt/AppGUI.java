@@ -190,6 +190,16 @@ public class AppGUI {
         }
     }
 
+    public void setConnectionButtons(boolean waitingToConnect){
+        if(waitingToConnect){
+            connectButton.setEnabled(true);
+            disconnectButton.setEnabled(false);
+        }else{
+            connectButton.setEnabled(false);
+            disconnectButton.setEnabled(true);
+        }
+
+    }
     private void setupButtons() {
         // Choosing a file to send
         fileChooseButton.addActionListener(new ActionListener() {
@@ -228,8 +238,17 @@ public class AppGUI {
                 // TODO: implment is runniong in SendThread (also Receive)
                 sendThread.start();
 
-                connectButton.setEnabled(false);
-                disconnectButton.setEnabled(true);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+                if(sendThread.getRunning().get()){
+                    setConnectionButtons(false);
+                }else{
+                    setConnectionButtons(true);
+                }
+
 
 
 

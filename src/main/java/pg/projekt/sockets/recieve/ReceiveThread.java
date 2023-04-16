@@ -20,6 +20,7 @@ public class ReceiveThread implements Runnable{
     private List<Message> receivedMsgList;
     private int port;
 
+
     /**
      * creates new thread
      * @param msgList - a list to store recieved messages in (shared between reciever, sender and printer threads)
@@ -72,16 +73,17 @@ public class ReceiveThread implements Runnable{
                     String inputString = input.toString();
                     putMsgOnList(inputString);
                 }
-                System.out.println("Communication was termined by the other side");
+                System.out.println("Communication was termined by the other side - end of input");
                 break;
 
             } catch(EOFException ex){
-                System.out.println("Communication was termined by the other side");
+                System.err.println("Communication was termined by the other side");
+                System.err.println(ex);
             }
             catch (SocketException ex) // thrown when socket closed
             {
-                System.out.println("Socket closed by other side - communication terminated");
-                System.out.println(ex);
+                System.err.println("Socket closed by other side - communication terminated");
+                System.err.println(ex);
                 break;
             } catch (ClassNotFoundException | IOException e) {
                 throw new RuntimeException(e);
