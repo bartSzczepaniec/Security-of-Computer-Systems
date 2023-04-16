@@ -1,8 +1,5 @@
 package pg.projekt;
 
-import com.google.common.hash.HashCode;
-import com.google.common.hash.Hashing;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +9,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class AppGUI {
@@ -33,9 +29,12 @@ public class AppGUI {
 
     private JFileChooser jFileChooser;
 
+    private EncryptionManager encryptionManager;
+
     public AppGUI() {
         frame = new JFrame("Security of Computer Systems");
         jFileChooser = new JFileChooser();
+        encryptionManager = new EncryptionManager();
     }
 
     public void startApp() {
@@ -126,14 +125,12 @@ public class AppGUI {
             if (result == JOptionPane.OK_OPTION) {
 
                 String password = new String(jPasswordField.getPassword());
-                System.out.println("PASSWORD: " + password);
-                String passwordHash = Hashing.sha256()
-                        .hashString(password, StandardCharsets.UTF_8)
-                        .toString();
+                System.out.println("ENTERED PASSWORD: " + password);
+                String passwordHash = encryptionManager.shaHashingToString(password);
 
                 // Password was already set
                 if(passwordFileExists) {
-                    if(isPasswordCorrect(passwordHash, passwordFile)) {
+                    if(encryptionManager.isPasswordCorrect(passwordHash, passwordFile)) {
                         passwordIsOk = true;
                     }
                 } // Setting a new password
@@ -146,22 +143,14 @@ public class AppGUI {
                         passwordIsOk = true;
                     }
                 }
+                if (passwordIsOk) {
+                    encryptionManager.setLocalKey(passwordHash);
+                }
             }
             if(!passwordIsOk) {
                 JOptionPane.showMessageDialog (null, "You must enter correct password", "Wrong password", JOptionPane.ERROR_MESSAGE);
             }
         }
-    }
-
-    // Checking if hash of entered password equals saved hash in the file
-    public boolean isPasswordCorrect(String hashedPassword, File passwordFile) throws FileNotFoundException {
-        Scanner scanner = new Scanner(passwordFile);
-        if (scanner.hasNextLine()) {
-            String passwordFromFile = scanner.nextLine();
-            return hashedPassword.equals(passwordFromFile);
-        }
-        scanner.close();
-        return false;
     }
 
     public void sendMessage() {
