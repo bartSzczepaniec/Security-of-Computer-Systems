@@ -29,6 +29,7 @@ public class AppGUI {
     private JButton fileChooseButton;
     private JButton sendFileButton;
     private JLabel fileLabel;
+    private JButton disconnectButton;
 
     private JFileChooser jFileChooser;
 
@@ -41,6 +42,7 @@ public class AppGUI {
     private SendThread sendThread;
     private MsgReader msgReader;
 
+    private int myPort;
 
 
     public AppGUI() {
@@ -50,11 +52,19 @@ public class AppGUI {
     }
 
     public void startApp() {
+        // Before entering the main app
+        boolean passwordEntered = false;
         try {
-            enterPassword();
+            passwordEntered = enterPassword();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if(!passwordEntered) {
+            return;
+        }
+
+        enterPort();
+
         sendMessageField.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -75,43 +85,7 @@ public class AppGUI {
             }
         });
 
-        // Choosing a file to send
-        fileChooseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int result = jFileChooser.showOpenDialog(null);
-
-                if(result == JFileChooser.APPROVE_OPTION) {
-                    File chosenFile = jFileChooser.getSelectedFile();
-                    // TODO - handle file
-                    fileLabel.setText(chosenFile.getName());
-                }
-
-
-            }
-        });
-
-        // Sending a Text message
-        sendMessageButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              sendMessage();
-            }
-        });
-
-        // Connecting to client with chosen IP address and Port
-        connectButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String chosenIP = ipTextField.getText();
-                int chosenPort = Integer.valueOf(portTextField.getText());
-                System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
-                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent);
-                sendThread.start();
-
-
-            }
-        });
+        setupButtons();
 
         frame.add(mainPanel);
         frame.setResizable(false);
@@ -132,14 +106,14 @@ public class AppGUI {
         this.msgList = Collections.synchronizedList(new ArrayList<Message>());
         this.toBeSent = Collections.synchronizedList(new ArrayList<Message>());
 
-        this.receiveThread = new ReceiveThread(msgList, 10001);
+        this.receiveThread = new ReceiveThread(msgList, myPort);
         this.receiveThread.start();
 
         this.msgReader = new MsgReader(msgList, messagesPane);
         this.msgReader.start();
     }
 
-    private void enterPassword() throws IOException {
+    private boolean enterPassword() throws IOException {
         JPasswordField jPasswordField = new JPasswordField();
 
         // Checking if file with password is already set
@@ -158,6 +132,10 @@ public class AppGUI {
         while (!passwordIsOk) {
             jPasswordField.setText("");
             int result = JOptionPane.showConfirmDialog(null, jPasswordField, "Enter the password:", JOptionPane.DEFAULT_OPTION);
+            System.out.println(result);
+            if (result == JOptionPane.DEFAULT_OPTION) {
+                return false;
+            }
             if (result == JOptionPane.OK_OPTION) {
 
                 String password = new String(jPasswordField.getPassword());
@@ -187,6 +165,20 @@ public class AppGUI {
                 JOptionPane.showMessageDialog (null, "You must enter correct password", "Wrong password", JOptionPane.ERROR_MESSAGE);
             }
         }
+        return true;
+    }
+
+    private void enterPort() {
+        boolean isPortSet = false;
+        try {
+            myPort = Integer.parseInt(JOptionPane.showInputDialog("Enter port:", 10000));
+        }
+        catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog (null, "You must enter correct password", "Wrong password", JOptionPane.ERROR_MESSAGE);
+            System.out.println("ENTERED TEXT IS NOT A PORT NUMBER");
+            System.out.println("PORT WAS SET TO 10000");
+            myPort=10000;
+        }
     }
 
     public void sendMessage() {
@@ -196,6 +188,55 @@ public class AppGUI {
             toBeSent.add(new Message(msgToSend, "test_sender")); // message sending
             sendMessageField.setText("");
         }
+    }
+
+    private void setupButtons() {
+        // Choosing a file to send
+        fileChooseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int result = jFileChooser.showOpenDialog(null);
+
+                if(result == JFileChooser.APPROVE_OPTION) {
+                    File chosenFile = jFileChooser.getSelectedFile();
+                    // TODO - handle file
+                    fileLabel.setText(chosenFile.getName());
+                }
+            }
+        });
+
+        // Sending a Text message
+        sendMessageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMessage();
+            }
+        });
+
+        // Connecting to client with chosen IP address and Port
+        connectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                messagesPane.setText("");
+
+                String chosenIP = ipTextField.getText();
+                int chosenPort = Integer.valueOf(portTextField.getText());
+                System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
+                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent);
+                sendThread.start();
+
+                connectButton.setEnabled(false);
+                disconnectButton.setEnabled(true);
+            }
+        });
+
+        disconnectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                connectButton.setEnabled(true);
+                disconnectButton.setEnabled(false);
+            }
+        });
     }
 
 }
