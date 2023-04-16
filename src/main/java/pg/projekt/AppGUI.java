@@ -129,7 +129,7 @@ public class AppGUI {
         this.msgList = Collections.synchronizedList(new ArrayList<Message>());
         this.toBeSent = Collections.synchronizedList(new ArrayList<Message>());
 
-        this.receiveThread = new ReceiveThread(msgList, 10000);
+        this.receiveThread = new ReceiveThread(msgList, 10001);
         this.receiveThread.start();
 
         this.msgReader = new MsgReader(msgList, messagesPane);

@@ -69,6 +69,7 @@ public class ReceiveThread implements Runnable{
                 while ((input = in.readObject()) != null) {
                     // Read object from stream
                     String inputString = input.toString();
+                    System.out.println(port);
                     putMsgOnList(inputString);
                 }
                 System.out.println("Communication was termined by the other side");

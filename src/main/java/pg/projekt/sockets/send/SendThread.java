@@ -43,7 +43,7 @@ public class SendThread implements Runnable{
      * @param msgConent - content of the message
      */
     public synchronized void putMsgOnList(String msgConent){
-        Message msg = new Message(msgConent, "sender");
+        Message msg = new Message(msgConent, address);
         this.sentMsgList.add(msg);
     }
 
