@@ -3,7 +3,7 @@
   <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="578" height="400"/>
+      <xy x="20" y="20" width="616" height="400"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -32,6 +32,7 @@
               </grid>
             </constraints>
             <properties>
+              <text value="localhost"/>
               <toolTipText value="e.g. 8.8.8.8"/>
             </properties>
           </component>
@@ -51,6 +52,7 @@
               </grid>
             </constraints>
             <properties>
+              <text value="9999"/>
               <toolTipText value="eg. 1015"/>
             </properties>
           </component>

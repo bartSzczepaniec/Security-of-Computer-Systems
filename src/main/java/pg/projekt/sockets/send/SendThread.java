@@ -35,6 +35,7 @@ public class SendThread implements Runnable{
 
     public void start(){
         worker.start();
+        System.out.println("Sender thread started (addres: " + address + ", port: " + port +")");
     }
 
     /**
@@ -56,7 +57,6 @@ public class SendThread implements Runnable{
             {
                 int counter =0;
                 while (true) {
-                    Thread.sleep(500);
                     if(messagesToSend.size() > 0){
                         Message msg = messagesToSend.remove(0);
                         out.writeObject(msg);
@@ -72,12 +72,11 @@ public class SendThread implements Runnable{
             {
                 System.out.println("Socket closed by other side - communication terminated");
                 break;
-            } catch (IOException | InterruptedException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
         }
-        System.out.println("THREAD FINISHED");
-
+        System.out.println("Sender thread finished (addres: " + address + ", port: " + port +")");
     }
 }
