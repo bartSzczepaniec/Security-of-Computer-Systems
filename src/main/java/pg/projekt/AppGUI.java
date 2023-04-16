@@ -108,7 +108,7 @@ public class AppGUI {
 
         // Checking if file with password is already set
         boolean passwordFileExists;
-        File passwordFile = new File("src/main/resources/EncryptionKey/password.txt");
+        File passwordFile = new File("src/main/resources/encryptionKey/password.txt");
         if (passwordFile.createNewFile()) {
             passwordFileExists = false;
         }
