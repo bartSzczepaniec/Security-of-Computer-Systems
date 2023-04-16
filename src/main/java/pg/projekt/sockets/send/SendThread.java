@@ -19,6 +19,8 @@ public class SendThread implements Runnable{
     private String address;
     private List<Message> sentMsgList;
     private List<Message> messagesToSend;
+
+    private Socket clientSocket;
     /**
      * creates new thread
      * @param address - the socket addres
@@ -31,6 +33,7 @@ public class SendThread implements Runnable{
         this.port = port;
         this.sentMsgList = msgList;
         this.messagesToSend = messagesToSend;
+        this.clientSocket = null;
     }
 
     public void start(){
@@ -50,11 +53,14 @@ public class SendThread implements Runnable{
     @Override
     public void run(){
         // read messages from socket until the ned
+        ObjectOutputStream out =null;
+        ObjectInputStream in = null;
         while(true) {
-            try (Socket clientSocket = new Socket(address, port);
-                 ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-                 ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream()))
-            {
+
+            try{
+                clientSocket = new Socket(address, port);
+                out = new ObjectOutputStream(clientSocket.getOutputStream());
+                in = new ObjectInputStream(clientSocket.getInputStream());
                 int counter =0;
                 while (true) {
                     if(messagesToSend.size() > 0){
@@ -68,12 +74,20 @@ public class SendThread implements Runnable{
 
                 }
 
-            } catch (SocketException ex)
+            } catch (SocketException | NullPointerException ex)
             {
-                System.out.println("Socket closed by other side - communication terminated");
+                System.out.println("Socket closed by other side or no open socket present - communication terminated");
                 break;
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            } finally {
+                try {
+                    out.close();
+                    in.close();
+                    clientSocket.close();
+                } catch (IOException | NullPointerException e) {
+                    break;
+                }
             }
 
         }
