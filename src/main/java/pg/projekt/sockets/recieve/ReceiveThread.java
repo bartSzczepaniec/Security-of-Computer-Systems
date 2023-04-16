@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
 @Setter
@@ -19,7 +20,8 @@ public class ReceiveThread implements Runnable{
 
     private List<Message> receivedMsgList;
     private int port;
-
+    private AtomicBoolean running;
+    private Socket clientSocket;
 
     /**
      * creates new thread
@@ -29,17 +31,21 @@ public class ReceiveThread implements Runnable{
     public ReceiveThread(List<Message> msgList, int port){
         this.serverSocket = null;
         this.port = port;
-        this.worker = new Thread(this);
+        this.worker = null;
         this.receivedMsgList = msgList;
+        this.running = new AtomicBoolean(false);
+        this.clientSocket = null;
     }
 
     /**
      *  Starts the reciever thread
      */
     public void start(){
+        this.worker = new Thread(this);
         try {
             serverSocket = new ServerSocket(port);
             worker.start();
+            this.running.set(true);
             System.out.println("Reciever thread started (port: " + port +")");
 
         } catch (IOException e) {
@@ -54,43 +60,46 @@ public class ReceiveThread implements Runnable{
      * @param msgContent - content of message
      */
     public synchronized void putMsgOnList(String msgContent){
-        Message msg = new Message(msgContent, "receiver");
+        Message msg = new Message(msgContent, "you");
         this.receivedMsgList.add(msg);
     }
 
 
     @Override
     public void run(){
-        while(true) {
             // if user does not accept client socket closed
-            try (Socket clientSocket = serverSocket.accept();
-                 ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream()); // ev. for msg confirmation
-                 ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream()))
-            {
-                Object input;
-                while ((input = in.readObject()) != null) {
-                    // Read object from stream
-                    String inputString = input.toString();
-                    putMsgOnList(inputString);
-                }
-                System.out.println("Communication was termined by the other side - end of input");
-                break;
+        ObjectOutputStream out = null;
+        ObjectInputStream in = null;
+        try
+        {
+            clientSocket = serverSocket.accept();
+            out = new ObjectOutputStream(clientSocket.getOutputStream()); // ev. for msg confirmation
+            in = new ObjectInputStream(clientSocket.getInputStream());
 
-            } catch(EOFException ex){
-                System.err.println("Communication was termined by the other side");
-                System.err.println(ex);
-            }
-            catch (SocketException ex) // thrown when socket closed
-            {
-                System.err.println("Socket closed by other side - communication terminated");
-                System.err.println(ex);
-                break;
-            } catch (ClassNotFoundException | IOException e) {
-                throw new RuntimeException(e);
+            Object input;
+            while ((input = in.readObject()) != null) {
+                // Read object from stream
+                String inputString = input.toString();
+                putMsgOnList(inputString);
             }
 
+        } catch(EOFException | SocketException ex ){
+            System.err.println("Communication terminated: EOF or other side closed");
+            System.err.println(ex);
+        } catch (ClassNotFoundException | IOException e) {
+            throw new RuntimeException(e);
+        }finally {
+            try { // close gently
+                out.close();
+                in.close();
+                clientSocket.close();
+                System.out.println("RECEIVER: closing gently");
+            } catch (IOException | NullPointerException e) {
+                System.err.println(e);
+            }
         }
 
+        this.running.set(false);
         System.out.println("Receiver thread stopped (port: " + port +")");
 
     }

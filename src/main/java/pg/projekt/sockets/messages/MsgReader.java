@@ -11,11 +11,14 @@ public class MsgReader implements Runnable{
 
     public MsgReader(List<Message> msgList, JTextPane messagesPane){
         this.msgList = msgList;
-        this.worker = new Thread(this);
+        this.worker = null;
         this.messagesPane = messagesPane;
     }
 
-    public void start(){ worker.start(); }
+    public void start(){
+        this.worker = new Thread(this);
+        worker.start();
+    }
 
     @Override
     public void run(){

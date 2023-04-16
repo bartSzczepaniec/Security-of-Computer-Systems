@@ -34,7 +34,7 @@ public class SendThread implements Runnable{
      * @param msgList - a list to store sent messages in (shared between reciever, sender and printer threads)
      */
     public SendThread(String address, int port, List<Message> msgList, List<Message> messagesToSend){
-        this.worker = new Thread(this);
+        this.worker = null;
         this.address = address;
         this.port = port;
         this.sentMsgList = msgList;
@@ -44,6 +44,7 @@ public class SendThread implements Runnable{
     }
 
     public void start(){
+        this.worker = new Thread(this);
         worker.start();
         System.out.println("Sender thread started (addres: " + address + ", port: " + port +")");
         this.running.set(true);
@@ -86,20 +87,20 @@ public class SendThread implements Runnable{
 
         } catch (NullPointerException | IOException | InterruptedException ex)
         {
-            System.out.println("Socket closed by other side or no open socket present - communication terminated");
+            System.err.println("Socket closed by other side or no open socket present - communication terminated");
             System.err.println(ex);
         } finally {
             try {
                 out.close();
                 in.close();
                 clientSocket.close();
-                System.out.println("Closing gently");
+                System.out.println("SENDER: closing gently");
             } catch (IOException | NullPointerException e) {
                 System.err.println(e);
             }
         }
 
         this.running.set(false);
-        System.out.println("Sender thread finished (addres: " + address + ", port: " + port +")");
+        System.out.println("Sender thread stopped (addres: " + address + ", port: " + port +")");
     }
 }
