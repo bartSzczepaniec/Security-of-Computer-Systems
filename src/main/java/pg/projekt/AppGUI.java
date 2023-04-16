@@ -29,6 +29,7 @@ public class AppGUI {
     private JButton fileChooseButton;
     private JButton sendFileButton;
     private JLabel fileLabel;
+    private JButton disconnectButton;
 
     private JFileChooser jFileChooser;
 
@@ -41,6 +42,7 @@ public class AppGUI {
     private SendThread sendThread;
     private MsgReader msgReader;
 
+    private int myPort;
 
 
     public AppGUI() {
@@ -75,40 +77,7 @@ public class AppGUI {
             }
         });
 
-        // Choosing a file to send
-        fileChooseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int result = jFileChooser.showOpenDialog(null);
-
-                if(result == JFileChooser.APPROVE_OPTION) {
-                    File chosenFile = jFileChooser.getSelectedFile();
-                    // TODO - handle file
-                    fileLabel.setText(chosenFile.getName());
-                }
-            }
-        });
-
-        // Sending a Text message
-        sendMessageButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              sendMessage();
-            }
-        });
-
-        // Connecting to client with chosen IP address and Port
-        connectButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String chosenIP = ipTextField.getText();
-                int chosenPort = Integer.valueOf(portTextField.getText());
-                System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
-                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent);
-                sendThread.start();
-
-            }
-        });
+        setupButtons();
 
         frame.add(mainPanel);
         frame.setResizable(false);
@@ -193,6 +162,53 @@ public class AppGUI {
             toBeSent.add(new Message(msgToSend, "test_sender")); // message sending
             sendMessageField.setText("");
         }
+    }
+
+    private void setupButtons() {
+        // Choosing a file to send
+        fileChooseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int result = jFileChooser.showOpenDialog(null);
+
+                if(result == JFileChooser.APPROVE_OPTION) {
+                    File chosenFile = jFileChooser.getSelectedFile();
+                    // TODO - handle file
+                    fileLabel.setText(chosenFile.getName());
+                }
+            }
+        });
+
+        // Sending a Text message
+        sendMessageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMessage();
+            }
+        });
+
+        // Connecting to client with chosen IP address and Port
+        connectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String chosenIP = ipTextField.getText();
+                int chosenPort = Integer.valueOf(portTextField.getText());
+                System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
+                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent);
+                sendThread.start();
+
+                connectButton.setEnabled(false);
+                disconnectButton.setEnabled(true);
+            }
+        });
+
+        disconnectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                connectButton.setEnabled(true);
+                disconnectButton.setEnabled(false);
+            }
+        });
     }
 
 }
