@@ -46,7 +46,7 @@ public class SendThread implements Runnable{
     public void start(){
         this.worker = new Thread(this);
         worker.start();
-        System.out.println("Sender thread started (addres: " + address + ", port: " + port +")");
+        System.out.println("SENDER: thread started (addres: " + address + ", port: " + port +")");
         this.running.set(true);
     }
 
@@ -73,9 +73,15 @@ public class SendThread implements Runnable{
             while (true) {
                 if(messagesToSend.size() > 0){
                     Message msg = messagesToSend.remove(0);
-                    out.writeObject(msg);
-                    out.flush();
-                    putMsgOnList(msg.getContent());
+
+                    try{
+                        putMsgOnList(msg.getContent());
+                        out.writeObject(msg);
+                        out.flush();
+                    }catch(ArrayIndexOutOfBoundsException ex){
+                        System.err.println("SENDER: invalid message");
+                    }
+
                 }
                 // check if there is any msg waiting and print every 0.2s
 
@@ -87,7 +93,7 @@ public class SendThread implements Runnable{
 
         } catch (NullPointerException | IOException | InterruptedException ex)
         {
-            System.err.println("Socket closed by other side or no open socket present - communication terminated");
+            System.err.println("SENDER: connection closed by other side or no open socket present - communication terminated");
             System.err.println(ex);
         } finally {
             try {
@@ -96,11 +102,12 @@ public class SendThread implements Runnable{
                 clientSocket.close();
                 System.out.println("SENDER: closing gently");
             } catch (IOException | NullPointerException e) {
+                System.err.println("SENDER: socket was not created");
                 System.err.println(e);
             }
         }
 
         this.running.set(false);
-        System.out.println("Sender thread stopped (addres: " + address + ", port: " + port +")");
+        System.out.println("SENDER: thread stopped (addres: " + address + ", port: " + port +")");
     }
 }

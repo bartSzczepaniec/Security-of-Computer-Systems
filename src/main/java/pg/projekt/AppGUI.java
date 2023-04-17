@@ -185,7 +185,7 @@ public class AppGUI {
         if(!sendMessageField.getText().isEmpty()) {
             String msgToSend = sendMessageField.getText();
             System.out.println("Message sent: " + msgToSend);
-            toBeSent.add(new Message(msgToSend, "test_sender")); // message sending
+            toBeSent.add(new Message(msgToSend, "youraddress")); // message sending
             sendMessageField.setText("");
         }
     }
