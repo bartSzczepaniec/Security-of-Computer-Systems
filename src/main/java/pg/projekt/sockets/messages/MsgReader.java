@@ -36,19 +36,16 @@ public class MsgReader implements Runnable{
                 Thread.sleep(200); // magical sleep, without doesnt work
                 Document doc = messagesPane.getDocument();
 
-                for(Message s : msgList){
-                    if(!s.isPrinted()){
-                        System.out.println(s.getSender() + ": " + s.getContent());
-                        // append text to currently displayed
-                        String sender = s.getSender();
-                        String content = s.getContent();
+                for(int i =0; i< msgList.size(); i++){
+                    Message s = msgList.get(i);
+                    System.out.println(s.getSender() + ": " + s.getContent());
+                    // append text to currently displayed
+                    String sender = s.getSender();
+                    String content = s.getContent();
 
-                        doc.insertString(doc.getLength(),sender + ": " , boldText );
-                        doc.insertString(doc.getLength(), content+ "\n", basicText );
-
-                        s.setPrinted(true);
-                    }
-
+                    doc.insertString(doc.getLength(),sender + ": " , boldText );
+                    doc.insertString(doc.getLength(), content+ "\n", basicText );
+                    msgList.remove(s);
                 }
             } catch (InterruptedException | BadLocationException e) {
                 throw new RuntimeException(e);
