@@ -32,19 +32,6 @@ public class Message implements Serializable {
 
     }
 
-    public String getSender(){
-        //String payloadString = new String(this.payload, StandardCharsets.UTF_8);
-        //return payloadString.split("___joiner___")[1].trim();
-        return this.sender;
-    }
-
-    public MessageType getType(){
-        //String payloadString = new String(this.payload, StandardCharsets.UTF_8);
-        //return MessageType.valueOf(payloadString.split("___joiner___")[0].trim());
-        return this.type;
-    }
-
-
     @Override
     public String toString(){
         return getContent();
