@@ -46,7 +46,7 @@ public class SendThread implements Runnable{
     public void start(){
         this.worker = new Thread(this);
         worker.start();
-        System.out.println("Sender thread started (addres: " + address + ", port: " + port +")");
+        System.out.println("SENDER: thread started (addres: " + address + ", port: " + port +")");
         this.running.set(true);
     }
 
@@ -87,7 +87,7 @@ public class SendThread implements Runnable{
 
         } catch (NullPointerException | IOException | InterruptedException ex)
         {
-            System.err.println("Socket closed by other side or no open socket present - communication terminated");
+            System.err.println("SENDER: connection closed by other side or no open socket present - communication terminated");
             System.err.println(ex);
         } finally {
             try {
@@ -96,11 +96,12 @@ public class SendThread implements Runnable{
                 clientSocket.close();
                 System.out.println("SENDER: closing gently");
             } catch (IOException | NullPointerException e) {
+                System.err.println("SENDER: socket was not created");
                 System.err.println(e);
             }
         }
 
         this.running.set(false);
-        System.out.println("Sender thread stopped (addres: " + address + ", port: " + port +")");
+        System.out.println("SENDER: thread stopped (addres: " + address + ", port: " + port +")");
     }
 }

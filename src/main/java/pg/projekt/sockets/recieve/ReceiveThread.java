@@ -38,7 +38,7 @@ public class ReceiveThread implements Runnable{
     }
 
     /**
-     *  Starts the reciever thread
+     *  Starts the receiver thread
      */
     public void start(){
         this.worker = new Thread(this);
@@ -46,7 +46,7 @@ public class ReceiveThread implements Runnable{
             serverSocket = new ServerSocket(port);
             worker.start();
             this.running.set(true);
-            System.out.println("Reciever thread started (port: " + port +")");
+            System.out.println("RECEIVER: thread started (port: " + port +")");
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -84,7 +84,7 @@ public class ReceiveThread implements Runnable{
             }
 
         } catch(EOFException | SocketException ex ){
-            System.err.println("Communication terminated: EOF or other side closed");
+            System.err.println("RECEIVER: communication terminated - EOF or other side closed");
             System.err.println(ex);
         } catch (ClassNotFoundException | IOException e) {
             throw new RuntimeException(e);
@@ -100,7 +100,7 @@ public class ReceiveThread implements Runnable{
         }
 
         this.running.set(false);
-        System.out.println("Receiver thread stopped (port: " + port +")");
+        System.out.println("RECEIVER: thread stopped (port: " + port +")");
 
     }
 
