@@ -73,9 +73,15 @@ public class SendThread implements Runnable{
             while (true) {
                 if(messagesToSend.size() > 0){
                     Message msg = messagesToSend.remove(0);
-                    out.writeObject(msg);
-                    out.flush();
-                    putMsgOnList(msg.getContent());
+
+                    try{
+                        putMsgOnList(msg.getContent());
+                        out.writeObject(msg);
+                        out.flush();
+                    }catch(ArrayIndexOutOfBoundsException ex){
+                        System.err.println("SENDER: invalid message");
+                    }
+
                 }
                 // check if there is any msg waiting and print every 0.2s
 
