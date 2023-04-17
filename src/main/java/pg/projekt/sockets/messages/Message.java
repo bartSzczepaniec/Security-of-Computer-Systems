@@ -12,6 +12,9 @@ import java.nio.charset.StandardCharsets;
 public class Message implements Serializable {
     private byte[] payload;
 
+    public Message(String content){
+        this(content, "", MessageType.INFO);
+    }
     public Message(String content, String sender){
         this(content, sender, MessageType.TEXT);
     }
@@ -28,6 +31,11 @@ public class Message implements Serializable {
     public String getSender() throws ArrayIndexOutOfBoundsException{
         String payloadString = new String(this.payload, StandardCharsets.UTF_8);
         return payloadString.split("___joiner___")[1].trim();
+    }
+
+    public MessageType getType() throws ArrayIndexOutOfBoundsException{
+        String payloadString = new String(this.payload, StandardCharsets.UTF_8);
+        return MessageType.valueOf(payloadString.split("___joiner___")[0].trim());
     }
 
 

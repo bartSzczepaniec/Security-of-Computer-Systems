@@ -80,6 +80,7 @@ public class SendThread implements Runnable{
                         out.flush();
                     }catch(ArrayIndexOutOfBoundsException ex){
                         System.err.println("SENDER: invalid message");
+                        sentMsgList.add(new Message("Invalid message content"));
                     }
 
                 }

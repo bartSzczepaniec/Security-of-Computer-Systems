@@ -1,10 +1,9 @@
 package pg.projekt.sockets.messages;
 
+
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
+import javax.swing.text.*;
+import java.awt.*;
 import java.util.List;
 
 public class MsgReader implements Runnable{
@@ -28,7 +27,10 @@ public class MsgReader implements Runnable{
     public void run(){
         SimpleAttributeSet boldText = new SimpleAttributeSet();
         SimpleAttributeSet basicText = new SimpleAttributeSet();
+        SimpleAttributeSet infoText = new SimpleAttributeSet();
+
         StyleConstants.setBold(boldText, true);
+        StyleConstants.setForeground(infoText, Color.RED);
 
         while(true){
 
@@ -40,11 +42,23 @@ public class MsgReader implements Runnable{
                     Message s = msgList.get(i);
                     System.out.println(s.getSender() + ": " + s.getContent());
                     // append text to currently displayed
-                    String sender = s.getSender();
-                    String content = s.getContent();
+                    MessageType type = s.getType();
 
-                    doc.insertString(doc.getLength(),sender + ": " , boldText );
-                    doc.insertString(doc.getLength(), content+ "\n", basicText );
+                    switch (type){
+                        case TEXT:
+                            String sender = s.getSender();
+                            String content = s.getContent();
+
+                            doc.insertString(doc.getLength(),sender + ": " , boldText );
+                            doc.insertString(doc.getLength(), content+ "\n", basicText );
+                            break;
+                        case INFO:
+                            String info = s.getContent();
+                            doc.insertString(doc.getLength(), info +"\n", infoText);
+                            break;
+                    }
+
+
                     msgList.remove(s);
                 }
             }catch (ArrayIndexOutOfBoundsException ex){
