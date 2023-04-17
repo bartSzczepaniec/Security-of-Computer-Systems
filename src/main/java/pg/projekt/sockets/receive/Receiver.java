@@ -1,4 +1,4 @@
-package pg.projekt.sockets.recieve;
+package pg.projekt.sockets.receive;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 @EqualsAndHashCode
 public class Message implements Serializable {
     private byte[] payload;
+    private MessageType type;
+    private String sender;
 
     public Message(String content){
         this(content, "", MessageType.INFO);
@@ -19,23 +21,27 @@ public class Message implements Serializable {
         this(content, sender, MessageType.TEXT);
     }
     public Message(String content, String sender, MessageType type){
-        this.payload = (type + "___joiner___" + sender +"___joiner___" + content).getBytes(StandardCharsets.UTF_8);
+        this.payload = (content).getBytes(StandardCharsets.UTF_8);
+        this.sender = sender;
+        this.type = type;
     }
 
-    public String getContent() throws ArrayIndexOutOfBoundsException{
+    public String getContent(){
         String payloadString = new String(this.payload, StandardCharsets.UTF_8);
-        return payloadString.split("___joiner___")[2].trim();
+        return payloadString;
 
     }
 
-    public String getSender() throws ArrayIndexOutOfBoundsException{
-        String payloadString = new String(this.payload, StandardCharsets.UTF_8);
-        return payloadString.split("___joiner___")[1].trim();
+    public String getSender(){
+        //String payloadString = new String(this.payload, StandardCharsets.UTF_8);
+        //return payloadString.split("___joiner___")[1].trim();
+        return this.sender;
     }
 
-    public MessageType getType() throws ArrayIndexOutOfBoundsException{
-        String payloadString = new String(this.payload, StandardCharsets.UTF_8);
-        return MessageType.valueOf(payloadString.split("___joiner___")[0].trim());
+    public MessageType getType(){
+        //String payloadString = new String(this.payload, StandardCharsets.UTF_8);
+        //return MessageType.valueOf(payloadString.split("___joiner___")[0].trim());
+        return this.type;
     }
 
 

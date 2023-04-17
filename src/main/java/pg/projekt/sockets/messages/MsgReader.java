@@ -61,8 +61,6 @@ public class MsgReader implements Runnable{
 
                     msgList.remove(s);
                 }
-            }catch (ArrayIndexOutOfBoundsException ex){
-                System.err.println("Invalid msg");
             }
             catch (InterruptedException|BadLocationException e) {
                 throw new RuntimeException(e);

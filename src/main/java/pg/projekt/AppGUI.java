@@ -2,7 +2,7 @@ package pg.projekt;
 
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MsgReader;
-import pg.projekt.sockets.recieve.ReceiveThread;
+import pg.projekt.sockets.receive.ReceiveThread;
 import pg.projekt.sockets.send.SendThread;
 
 import javax.swing.*;
