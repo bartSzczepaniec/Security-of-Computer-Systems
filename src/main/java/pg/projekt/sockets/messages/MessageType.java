@@ -1,6 +1,6 @@
 package pg.projekt.sockets.messages;
 
-public enum MessageTypes {
+public enum MessageType {
     TEXT,
     FILE,
     CONFIRM,
