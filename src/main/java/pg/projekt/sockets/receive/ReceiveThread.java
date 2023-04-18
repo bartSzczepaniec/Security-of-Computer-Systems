@@ -9,6 +9,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
@@ -58,13 +59,11 @@ public class ReceiveThread implements Runnable{
 
     /**
      * Put read message on the list
-     * @param msgContent - content of message
+     * @param msg - whole message
      */
-    public synchronized void putMsgOnList(String msgContent, String sender){
-        Message msg = new Message(msgContent, sender);
+    public synchronized void putMsgOnList(Message msg){
         this.receivedMsgList.add(msg);
     }
-
 
     @Override
     public void run(){
@@ -81,7 +80,7 @@ public class ReceiveThread implements Runnable{
             while ((input = in.readObject()) != null) {
                 // Read object from stream
                 Message msg = (Message)input;
-                putMsgOnList(msg.getContent(), msg.getSender());
+                putMsgOnList(msg);
 
                 // Send confirmation of receiving
                 System.out.println("RECEIVED:" + msg.getUuid().toString());

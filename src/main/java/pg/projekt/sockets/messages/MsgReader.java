@@ -85,7 +85,7 @@ public class MsgReader implements Runnable{
         for (MessageToBeConfirmed msgToConfirm : msgToConfirmList) {
             //System.out.println("CHECKING: " + msgToConfirm.getMsg().getUuid().toString());
             if(msgToConfirm.getMsg().getUuid().toString().equals(confirmation.getContent())) {
-                doc.insertString(msgToConfirm.getConfirmationSignPos(), "™", basicText );
+                doc.insertString(msgToConfirm.getConfirmationSignPos(), "✓", basicText );
             }
         }
     }

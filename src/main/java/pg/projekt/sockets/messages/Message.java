@@ -14,7 +14,8 @@ public class Message implements Serializable {
     private byte[] payload;
     private MessageType type;
     private String sender;
-    private UUID uuid;
+    private Integer uuid;
+    private static Integer counter = 0;
 
     public Message(String content){
         this(content, "", MessageType.INFO);
@@ -26,16 +27,14 @@ public class Message implements Serializable {
         this.payload = (content).getBytes(StandardCharsets.UTF_8);
         this.sender = sender;
         this.type = type;
-        this.uuid = UUID.randomUUID();
+        this.uuid = counter++;
     }
-
-    public Message(String content, String sender, MessageType type, UUID uuid){
+    public Message(String content, String sender, MessageType type, Integer uuid){
         this.payload = (content).getBytes(StandardCharsets.UTF_8);
         this.sender = sender;
         this.type = type;
         this.uuid = uuid;
     }
-
     public String getContent(){
         String payloadString = new String(this.payload, StandardCharsets.UTF_8);
         return payloadString;

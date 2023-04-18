@@ -10,6 +10,7 @@ import pg.projekt.sockets.send.SendThread;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter

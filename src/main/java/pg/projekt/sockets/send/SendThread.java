@@ -16,6 +16,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Getter
@@ -54,11 +55,11 @@ public class SendThread implements Runnable{
 
     /**
      * Put sent message on list
-     * @param msgConent - content of the message
+     * @param msg - content of the message
      */
-    public synchronized void putMsgOnList(String msgConent){
-        Message msg = new Message(msgConent, "You");
-        this.sentMsgList.add(msg);
+    public synchronized void putMsgOnList(Message msg){
+        Message msgToPrint = new Message(msg.getContent(), "You", msg.getType(), msg.getUuid());
+        this.sentMsgList.add(msgToPrint);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class SendThread implements Runnable{
                     Message msg = messagesToSend.remove(0);
 
                     try{
-                        putMsgOnList(msg.getContent());
+                        putMsgOnList(msg);
                         out.writeObject(msg);
                         System.out.println("SENT");
                         out.flush();
