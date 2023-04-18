@@ -11,23 +11,26 @@ import java.nio.charset.StandardCharsets;
 @EqualsAndHashCode
 public class Message implements Serializable {
     private byte[] payload;
+    private MessageType type;
+    private String sender;
 
+    public Message(String content){
+        this(content, "", MessageType.INFO);
+    }
     public Message(String content, String sender){
-        this.payload = (sender +"___joiner___" + content).getBytes(StandardCharsets.UTF_8);
+        this(content, sender, MessageType.TEXT);
+    }
+    public Message(String content, String sender, MessageType type){
+        this.payload = (content).getBytes(StandardCharsets.UTF_8);
+        this.sender = sender;
+        this.type = type;
     }
 
-    // TODO: catch excpetion when joinerused
-    public String getContent() throws ArrayIndexOutOfBoundsException{
+    public String getContent(){
         String payloadString = new String(this.payload, StandardCharsets.UTF_8);
-        return payloadString.split("___joiner___")[1].trim();
+        return payloadString;
 
     }
-
-    public String getSender() throws ArrayIndexOutOfBoundsException{
-        String payloadString = new String(this.payload, StandardCharsets.UTF_8);
-        return payloadString.split("___joiner___")[0].trim();
-    }
-
 
     @Override
     public String toString(){

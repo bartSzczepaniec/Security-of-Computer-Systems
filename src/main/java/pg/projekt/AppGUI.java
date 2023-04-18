@@ -2,7 +2,7 @@ package pg.projekt;
 
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MsgReader;
-import pg.projekt.sockets.recieve.ReceiveThread;
+import pg.projekt.sockets.receive.ReceiveThread;
 import pg.projekt.sockets.send.SendThread;
 
 import javax.swing.*;
@@ -178,6 +178,8 @@ public class AppGUI {
             System.out.println("ENTERED TEXT IS NOT A PORT NUMBER");
             System.out.println("PORT WAS SET TO 10000");
             myPort=10000;
+        }finally {
+            frame.setTitle(frame.getTitle() + " - " + myPort);
         }
     }
 
@@ -185,7 +187,7 @@ public class AppGUI {
         if(!sendMessageField.getText().isEmpty()) {
             String msgToSend = sendMessageField.getText();
             System.out.println("Message sent: " + msgToSend);
-            toBeSent.add(new Message(msgToSend, "youraddress")); // message sending
+            toBeSent.add(new Message(msgToSend, "Friend")); // message sending
             sendMessageField.setText("");
         }
     }
@@ -230,6 +232,7 @@ public class AppGUI {
                 messagesPane.setText("");
                 msgList.removeAll(msgList);
                 toBeSent.removeAll(toBeSent);
+                msgList.add(new Message("Connecting..."));
 
                 String chosenIP = ipTextField.getText();
                 int chosenPort = Integer.valueOf(portTextField.getText());
@@ -238,6 +241,10 @@ public class AppGUI {
                 // TODO: implment is runniong in SendThread (also Receive)
                 sendThread.start();
 
+
+                // TODO: check if connection succesful
+                // TODO: something displayed under buttons
+                // TODO: block horizontal scorlling
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException ex) {
@@ -245,6 +252,7 @@ public class AppGUI {
                 }
                 if(sendThread.getRunning().get()){
                     setConnectionButtons(false);
+                    msgList.add(new Message("Connected"));
                 }else{
                     setConnectionButtons(true);
                 }
@@ -271,12 +279,12 @@ public class AppGUI {
                     // restart reciever thread - ready for new connections
                     receiveThread.start();
 
-                    connectButton.setEnabled(true);
-                    disconnectButton.setEnabled(false);
                     setConnectionButtons(true);
+                    msgList.add(new Message("Disconnected"));
 
                 } catch (IOException | NullPointerException | InterruptedException ex) {
                     System.err.println("Closed not exisiting connection");
+                    setConnectionButtons(true);
                 }
             }
         });

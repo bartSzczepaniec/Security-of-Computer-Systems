@@ -1,4 +1,4 @@
-package pg.projekt.sockets.recieve;
+package pg.projekt.sockets.receive;
 
 import lombok.*;
 import pg.projekt.sockets.messages.Message;
@@ -59,8 +59,8 @@ public class ReceiveThread implements Runnable{
      * Put read message on the list
      * @param msgContent - content of message
      */
-    public synchronized void putMsgOnList(String msgContent){
-        Message msg = new Message(msgContent, "you");
+    public synchronized void putMsgOnList(String msgContent, String sender){
+        Message msg = new Message(msgContent, sender);
         this.receivedMsgList.add(msg);
     }
 
@@ -79,8 +79,8 @@ public class ReceiveThread implements Runnable{
             Object input;
             while ((input = in.readObject()) != null) {
                 // Read object from stream
-                String inputString = input.toString();
-                putMsgOnList(inputString);
+                Message msg = (Message)input;
+                putMsgOnList(msg.getContent(), msg.getSender());
             }
 
         } catch(EOFException | SocketException ex ){
