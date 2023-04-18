@@ -15,7 +15,7 @@ public class Message implements Serializable {
     private MessageType type;
     private String sender;
     private Integer uuid;
-    private static Integer counter = 0;
+    private static Integer counter = 0; // TODO CAN BE CHANGED BACK TO UUID
 
     public Message(String content){
         this(content, "", MessageType.INFO);
