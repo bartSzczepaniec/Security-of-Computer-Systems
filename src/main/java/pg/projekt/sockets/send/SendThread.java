@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.checkerframework.checker.units.qual.A;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
+import pg.projekt.sockets.messages.MsgReader;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -60,9 +61,6 @@ public class SendThread implements Runnable{
         this.sentMsgList.add(msg);
     }
 
-    public synchronized void putConfirmationOnList(Message msg) {
-        this.sentMsgList.add(msg);
-    }
     @Override
     public void run(){
         // read messages from socket until the ned
@@ -73,6 +71,8 @@ public class SendThread implements Runnable{
             clientSocket = new Socket(address, port);
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
+            ConfirmationThread ct = new ConfirmationThread(in, sentMsgList);
+            ct.start();
 
             while (true) {
                 if(messagesToSend.size() > 0){
@@ -89,13 +89,6 @@ public class SendThread implements Runnable{
                     }
 
                 }
-                // check if there is any confirmation msg waiting
-                Object input;
-                if ((input = in.readObject()) != null) {
-                    // Read confirmation message from stream
-                    Message msg = (Message)input;
-                    putConfirmationOnList(msg);
-                }
 
                 Thread.sleep(200);
                 if(clientSocket.isClosed()){
@@ -103,7 +96,7 @@ public class SendThread implements Runnable{
                 }
             }
 
-        } catch (NullPointerException | IOException | InterruptedException | ClassNotFoundException ex)
+        } catch (NullPointerException | IOException | InterruptedException ex)
         {
             System.err.println("SENDER: connection closed by other side or no open socket present - communication terminated");
             System.err.println(ex);

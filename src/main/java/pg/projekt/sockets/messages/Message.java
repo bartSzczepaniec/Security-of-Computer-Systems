@@ -29,6 +29,13 @@ public class Message implements Serializable {
         this.uuid = UUID.randomUUID();
     }
 
+    public Message(String content, String sender, MessageType type, UUID uuid){
+        this.payload = (content).getBytes(StandardCharsets.UTF_8);
+        this.sender = sender;
+        this.type = type;
+        this.uuid = uuid;
+    }
+
     public String getContent(){
         String payloadString = new String(this.payload, StandardCharsets.UTF_8);
         return payloadString;

@@ -84,6 +84,7 @@ public class ReceiveThread implements Runnable{
                 putMsgOnList(msg.getContent(), msg.getSender());
 
                 // Send confirmation of receiving
+                System.out.println("RECEIVED:" + msg.getUuid().toString());
                 Message confirmation = new Message(msg.getUuid().toString(), "Friend", MessageType.CONFIRM);
                 out.writeObject(confirmation);
                 out.flush();

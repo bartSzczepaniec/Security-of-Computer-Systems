@@ -44,7 +44,7 @@ public class MsgReader implements Runnable{
 
                 for(int i =0; i< msgList.size(); i++){
                     Message s = msgList.get(i);
-                    System.out.println(s.getSender() + ": " + s.getContent());
+                    System.out.println(s.getSender() + ": " + s.getContent() + "|" + s.getUuid().toString());
                     // append text to currently displayed
                     MessageType type = s.getType();
 
@@ -56,10 +56,8 @@ public class MsgReader implements Runnable{
                             doc.insertString(doc.getLength(),sender + ": " , boldText );
                             doc.insertString(doc.getLength(), content+ "\n", basicText );
                             // TODO: miejsce na confirmed
-                            if (sender.equals("you"))
-                               // msgToConfirmList.add(new MessageToBeConfirmed(s, doc.getLength()-1));
-                                continue;
-
+                            if (sender.equals("You"))
+                                msgToConfirmList.add(new MessageToBeConfirmed(s, doc.getLength()-1));
                             break;
                         case INFO:
                             String info = s.getContent();
@@ -85,6 +83,7 @@ public class MsgReader implements Runnable{
 
     public void confirmMessage(Message confirmation, Document doc, SimpleAttributeSet basicText) throws BadLocationException {
         for (MessageToBeConfirmed msgToConfirm : msgToConfirmList) {
+            //System.out.println("CHECKING: " + msgToConfirm.getMsg().getUuid().toString());
             if(msgToConfirm.getMsg().getUuid().toString().equals(confirmation.getContent())) {
                 doc.insertString(msgToConfirm.getConfirmationSignPos(), "™", basicText );
             }
