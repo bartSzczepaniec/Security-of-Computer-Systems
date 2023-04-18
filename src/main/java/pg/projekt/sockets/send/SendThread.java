@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.checkerframework.checker.units.qual.A;
 import pg.projekt.sockets.messages.Message;
+import pg.projekt.sockets.messages.MessageType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -59,6 +60,9 @@ public class SendThread implements Runnable{
         this.sentMsgList.add(msg);
     }
 
+    public synchronized void putConfirmationOnList(Message msg) {
+        this.sentMsgList.add(msg);
+    }
     @Override
     public void run(){
         // read messages from socket until the ned
@@ -77,6 +81,7 @@ public class SendThread implements Runnable{
                     try{
                         putMsgOnList(msg.getContent());
                         out.writeObject(msg);
+                        System.out.println("SENT");
                         out.flush();
                     }catch(ArrayIndexOutOfBoundsException ex){
                         System.err.println("SENDER: invalid message");
@@ -84,7 +89,13 @@ public class SendThread implements Runnable{
                     }
 
                 }
-                // check if there is any msg waiting and print every 0.2s
+                // check if there is any confirmation msg waiting
+                Object input;
+                if ((input = in.readObject()) != null) {
+                    // Read confirmation message from stream
+                    Message msg = (Message)input;
+                    putConfirmationOnList(msg);
+                }
 
                 Thread.sleep(200);
                 if(clientSocket.isClosed()){
@@ -92,7 +103,7 @@ public class SendThread implements Runnable{
                 }
             }
 
-        } catch (NullPointerException | IOException | InterruptedException ex)
+        } catch (NullPointerException | IOException | InterruptedException | ClassNotFoundException ex)
         {
             System.err.println("SENDER: connection closed by other side or no open socket present - communication terminated");
             System.err.println(ex);

@@ -2,6 +2,7 @@ package pg.projekt.sockets.receive;
 
 import lombok.*;
 import pg.projekt.sockets.messages.Message;
+import pg.projekt.sockets.messages.MessageType;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -81,6 +82,11 @@ public class ReceiveThread implements Runnable{
                 // Read object from stream
                 Message msg = (Message)input;
                 putMsgOnList(msg.getContent(), msg.getSender());
+
+                // Send confirmation of receiving
+                Message confirmation = new Message(msg.getUuid().toString(), "Friend", MessageType.CONFIRM);
+                out.writeObject(confirmation);
+                out.flush();
             }
 
         } catch(EOFException | SocketException ex ){

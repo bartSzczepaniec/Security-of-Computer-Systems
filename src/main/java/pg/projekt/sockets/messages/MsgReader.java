@@ -4,18 +4,22 @@ package pg.projekt.sockets.messages;
 import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MsgReader implements Runnable{
     private Thread worker;
 
     private List<Message> msgList;
+    private List<MessageToBeConfirmed> msgToConfirmList;
     private JTextPane messagesPane;
 
     public MsgReader(List<Message> msgList, JTextPane messagesPane){
         this.msgList = msgList;
         this.worker = null;
         this.messagesPane = messagesPane;
+        this.msgToConfirmList = Collections.synchronizedList(new ArrayList<MessageToBeConfirmed>());
     }
 
     public void start(){
@@ -52,10 +56,17 @@ public class MsgReader implements Runnable{
                             doc.insertString(doc.getLength(),sender + ": " , boldText );
                             doc.insertString(doc.getLength(), content+ "\n", basicText );
                             // TODO: miejsce na confirmed
+                            if (sender.equals("you"))
+                               // msgToConfirmList.add(new MessageToBeConfirmed(s, doc.getLength()-1));
+                                continue;
+
                             break;
                         case INFO:
                             String info = s.getContent();
                             doc.insertString(doc.getLength(), info +"\n", infoText);
+                            break;
+                        case CONFIRM:
+                            confirmMessage(s, doc, basicText);
                             break;
                     }
 
@@ -70,6 +81,14 @@ public class MsgReader implements Runnable{
         }
 
 
+    }
+
+    public void confirmMessage(Message confirmation, Document doc, SimpleAttributeSet basicText) throws BadLocationException {
+        for (MessageToBeConfirmed msgToConfirm : msgToConfirmList) {
+            if(msgToConfirm.getMsg().getUuid().toString().equals(confirmation.getContent())) {
+                doc.insertString(msgToConfirm.getConfirmationSignPos(), "™", basicText );
+            }
+        }
     }
 
 

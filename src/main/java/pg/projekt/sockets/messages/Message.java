@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,6 +14,7 @@ public class Message implements Serializable {
     private byte[] payload;
     private MessageType type;
     private String sender;
+    private UUID uuid;
 
     public Message(String content){
         this(content, "", MessageType.INFO);
@@ -24,6 +26,7 @@ public class Message implements Serializable {
         this.payload = (content).getBytes(StandardCharsets.UTF_8);
         this.sender = sender;
         this.type = type;
+        this.uuid = UUID.randomUUID();
     }
 
     public String getContent(){
