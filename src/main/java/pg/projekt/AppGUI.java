@@ -178,6 +178,8 @@ public class AppGUI {
             System.out.println("ENTERED TEXT IS NOT A PORT NUMBER");
             System.out.println("PORT WAS SET TO 10000");
             myPort=10000;
+        }finally {
+            frame.setTitle(frame.getTitle() + " - " + myPort);
         }
     }
 
@@ -185,7 +187,7 @@ public class AppGUI {
         if(!sendMessageField.getText().isEmpty()) {
             String msgToSend = sendMessageField.getText();
             System.out.println("Message sent: " + msgToSend);
-            toBeSent.add(new Message(msgToSend, "youraddress")); // message sending
+            toBeSent.add(new Message(msgToSend, "Friend")); // message sending
             sendMessageField.setText("");
         }
     }

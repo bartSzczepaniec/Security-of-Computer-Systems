@@ -51,6 +51,7 @@ public class MsgReader implements Runnable{
 
                             doc.insertString(doc.getLength(),sender + ": " , boldText );
                             doc.insertString(doc.getLength(), content+ "\n", basicText );
+                            // TODO: miejsce na confirmed
                             break;
                         case INFO:
                             String info = s.getContent();
