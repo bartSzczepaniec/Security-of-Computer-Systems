@@ -25,6 +25,7 @@ public class MsgReader implements Runnable{
     public void start(){
         this.worker = new Thread(this);
         worker.start();
+        System.out.println("STARTING");
     }
 
     @Override
@@ -43,8 +44,9 @@ public class MsgReader implements Runnable{
                 Document doc = messagesPane.getDocument();
 
                 for(int i =0; i< msgList.size(); i++){
+
                     Message s = msgList.get(i);
-                    System.out.println(s.getSender() + ": " + s.getContent());
+                    System.out.println(s.getSender() + ": asdasdasd" + s.getContent());
                     // append text to currently displayed
                     MessageType type = s.getType();
 
@@ -56,14 +58,13 @@ public class MsgReader implements Runnable{
                             doc.insertString(doc.getLength(),sender + ": " , boldText );
                             doc.insertString(doc.getLength(), content+ "\n", basicText );
                             // TODO: miejsce na confirmed
-                            if (sender.equals("you"))
-                               // msgToConfirmList.add(new MessageToBeConfirmed(s, doc.getLength()-1));
-                                continue;
+
 
                             break;
                         case INFO:
                             String info = s.getContent();
                             doc.insertString(doc.getLength(), info +"\n", infoText);
+                            System.out.println("EHEJE");
                             break;
                         case CONFIRM:
                             confirmMessage(s, doc, basicText);

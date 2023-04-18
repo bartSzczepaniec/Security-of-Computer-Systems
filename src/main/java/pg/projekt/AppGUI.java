@@ -1,5 +1,8 @@
 package pg.projekt;
 
+import lombok.Getter;
+import lombok.Setter;
+import pg.projekt.sockets.applogic.AppLogic;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MsgReader;
 import pg.projekt.sockets.receive.ReceiveThread;
@@ -14,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+
+@Getter
+@Setter
 public class AppGUI {
     private JFrame frame;
     private JPanel mainPanel;
@@ -32,25 +38,16 @@ public class AppGUI {
     private JButton disconnectButton;
 
     private JFileChooser jFileChooser;
+    private AppLogic backend;
 
-    private EncryptionManager encryptionManager;
-
-    private List<Message> msgList;
-    private List<Message> toBeSent;
-
-    private ReceiveThread receiveThread;
-    private SendThread sendThread;
-    private MsgReader msgReader;
-
-    private int myPort;
-
-
-    public AppGUI() {
+    public AppGUI(AppLogic backend) {
         frame = new JFrame("Security of Computer Systems");
         jFileChooser = new JFileChooser();
-        encryptionManager = new EncryptionManager();
+        this.backend = backend;
     }
+    public void initGUI(){
 
+    }
     public void startApp() {
         // Before entering the main app
         boolean passwordEntered = false;
@@ -79,7 +76,7 @@ public class AppGUI {
             @Override
             public void keyReleased(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                   sendMessage(); // Sending a Text message
+                   backend.sendMessage(); // Sending a Text message
                 }
 
             }
@@ -94,7 +91,7 @@ public class AppGUI {
             @Override
             public void windowClosing(WindowEvent e) {
                 try {
-                    receiveThread.getServerSocket().close();
+                    backend.getReceiveThread().getServerSocket().close();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -103,19 +100,21 @@ public class AppGUI {
         frame.pack();
         frame.setVisible(true);
 
-        this.msgList = Collections.synchronizedList(new ArrayList<Message>());
+        backend.StartApp();
+        /*this.msgList = Collections.synchronizedList(new ArrayList<Message>());
         this.toBeSent = Collections.synchronizedList(new ArrayList<Message>());
 
         this.receiveThread = new ReceiveThread(msgList, myPort);
         this.receiveThread.start();
 
         this.msgReader = new MsgReader(msgList, messagesPane);
-        this.msgReader.start();
+        this.msgReader.start();*/
     }
 
     private boolean enterPassword() throws IOException {
         JPasswordField jPasswordField = new JPasswordField();
 
+        EncryptionManager encryptionManager = backend.getEncryptionManager();
         // Checking if file with password is already set
         boolean passwordFileExists;
         File passwordFile = new File("src/main/resources/encryptionKey/password.txt");
@@ -170,6 +169,7 @@ public class AppGUI {
 
     private void enterPort() {
         boolean isPortSet = false;
+        int myPort =0;
         try {
             myPort = Integer.parseInt(JOptionPane.showInputDialog("Enter port:", 10000));
         }
@@ -180,16 +180,38 @@ public class AppGUI {
             myPort=10000;
         }finally {
             frame.setTitle(frame.getTitle() + " - " + myPort);
+            this.backend.setMyPort(myPort);
         }
     }
 
-    public void sendMessage() {
+    /*public void sendMessage() {
         if(!sendMessageField.getText().isEmpty()) {
             String msgToSend = sendMessageField.getText();
             System.out.println("Message sent: " + msgToSend);
             toBeSent.add(new Message(msgToSend, "Friend")); // message sending
             sendMessageField.setText("");
         }
+    }*/
+    public void resetMessageField(){
+        sendMessageField.setText("");
+    }
+    public String getMessageFieldContent(){
+        if(!sendMessageField.getText().isEmpty()) {
+            String msgToSend = sendMessageField.getText();
+            sendMessageField.setText("");
+            return msgToSend;
+        }else{
+            return "";
+        }
+    }
+
+    public String getIpFieldValue(){
+        return this.ipTextField.getText();
+    }
+
+    public int getPortFieldValue(){
+        int port =  Integer.valueOf(this.portTextField.getText());
+        return port;
     }
 
     public void setConnectionButtons(boolean waitingToConnect){
@@ -201,6 +223,10 @@ public class AppGUI {
             disconnectButton.setEnabled(true);
         }
 
+    }
+
+    public void resetMessagePane(){
+        this.messagesPane.setText("");
     }
     private void setupButtons() {
         // Choosing a file to send
@@ -221,7 +247,7 @@ public class AppGUI {
         sendMessageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                sendMessage();
+                backend.sendMessage();
             }
         });
 
@@ -229,10 +255,9 @@ public class AppGUI {
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                messagesPane.setText("");
-                msgList.removeAll(msgList);
-                toBeSent.removeAll(toBeSent);
-                msgList.add(new Message("Connecting..."));
+                System.out.println(portTextField.getText());
+                backend.connect();
+                /*msgList.add(new Message("Connecting..."));
 
                 String chosenIP = ipTextField.getText();
                 int chosenPort = Integer.valueOf(portTextField.getText());
@@ -255,7 +280,7 @@ public class AppGUI {
                     msgList.add(new Message("Connected"));
                 }else{
                     setConnectionButtons(true);
-                }
+                }*/
 
 
 
@@ -267,8 +292,8 @@ public class AppGUI {
         disconnectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
-                try {
+                backend.disconnect();
+                /*try {
                     // close sockets
                     sendThread.getClientSocket().close();
                     receiveThread.getClientSocket().close();
@@ -285,7 +310,7 @@ public class AppGUI {
                 } catch (IOException | NullPointerException | InterruptedException ex) {
                     System.err.println("Closed not exisiting connection");
                     setConnectionButtons(true);
-                }
+                }*/
             }
         });
     }
