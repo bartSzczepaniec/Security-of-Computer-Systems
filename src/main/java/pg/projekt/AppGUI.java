@@ -1,5 +1,6 @@
 package pg.projekt;
 
+import com.google.common.hash.HashCode;
 import lombok.Getter;
 import lombok.Setter;
 import pg.projekt.sockets.messages.Message;
@@ -150,7 +151,9 @@ public class AppGUI {
 
                 String password = new String(jPasswordField.getPassword());
                 System.out.println("ENTERED PASSWORD: " + password);
-                String passwordHash = encryptionManager.shaHashingToString(password);
+
+                HashCode passwordHashBytes = encryptionManager.shaHashingToString(password);
+                String passwordHash = passwordHashBytes.toString();
 
                 // Password was already set
                 if(passwordFileExists) {
@@ -168,7 +171,8 @@ public class AppGUI {
                     }
                 }
                 if (passwordIsOk) {
-                    encryptionManager.setLocalKey(passwordHash);
+                    encryptionManager.setLocalKey(passwordHashBytes.asBytes());
+                    encryptionManager.generateRSAkeys();
                 }
             }
             if(!passwordIsOk) {

@@ -72,8 +72,14 @@ public class SendThread implements Runnable{
             clientSocket = new Socket(address, port);
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
+            // start confirmation thread
             ConfirmationThread ct = new ConfirmationThread(in, sentMsgList);
             ct.start();
+
+            // send key
+
+
+
 
             while (true) {
                 if(messagesToSend.size() > 0){
