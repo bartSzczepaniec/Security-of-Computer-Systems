@@ -3,12 +3,12 @@
   <grid id="27dc6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="617" height="400"/>
+      <xy x="20" y="20" width="637" height="400"/>
     </constraints>
     <properties/>
     <border type="none"/>
     <children>
-      <grid id="68aa6" layout-manager="GridLayoutManager" row-count="7" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="68aa6" layout-manager="GridLayoutManager" row-count="10" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -66,7 +66,7 @@
           </component>
           <vspacer id="b2395">
             <constraints>
-              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
+              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
                 <preferred-size width="-1" height="30"/>
               </grid>
             </constraints>
@@ -78,6 +78,31 @@
             <properties>
               <enabled value="false"/>
               <text value="Disconnect"/>
+            </properties>
+          </component>
+          <component id="41934" class="javax.swing.JLabel" binding="modeLabel">
+            <constraints>
+              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Choose mode of AES encryption"/>
+            </properties>
+          </component>
+          <component id="2ae85" class="javax.swing.JRadioButton" binding="cbcRadioButton">
+            <constraints>
+              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="CBC"/>
+            </properties>
+          </component>
+          <component id="90ae4" class="javax.swing.JRadioButton" binding="ecbRadioButton">
+            <constraints>
+              <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <selected value="true"/>
+              <text value="ECB"/>
             </properties>
           </component>
         </children>
@@ -203,4 +228,10 @@
       </hspacer>
     </children>
   </grid>
+  <buttonGroups>
+    <group name="modeGroup">
+      <member id="90ae4"/>
+      <member id="2ae85"/>
+    </group>
+  </buttonGroups>
 </form>

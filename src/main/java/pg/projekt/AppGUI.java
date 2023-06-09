@@ -37,6 +37,9 @@ public class AppGUI {
     private JButton sendFileButton;
     private JLabel fileLabel;
     private JButton disconnectButton;
+    private JLabel modeLabel;
+    private JRadioButton cbcRadioButton;
+    private JRadioButton ecbRadioButton;
 
     private JFileChooser jFileChooser;
 
@@ -198,6 +201,11 @@ public class AppGUI {
     }
 
     public void sendMessage() {
+        //if (cbcRadioButton.isSelected()) {
+        //}
+        //else { // ecb
+
+        //}
         if(!sendMessageField.getText().isEmpty()) {
             String msgToSend = sendMessageField.getText();
             System.out.println("Message sent: " + msgToSend);
