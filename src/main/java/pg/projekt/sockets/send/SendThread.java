@@ -4,6 +4,9 @@ package pg.projekt.sockets.send;
 import lombok.Getter;
 import lombok.Setter;
 import org.checkerframework.checker.units.qual.A;
+import pg.projekt.App;
+import pg.projekt.AppGUI;
+import pg.projekt.EncryptionManager;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
 import pg.projekt.sockets.messages.MsgReader;
@@ -30,13 +33,15 @@ public class SendThread implements Runnable{
     private List<Message> messagesToSend;
     private Socket clientSocket;
     private AtomicBoolean running;
+
+    private EncryptionManager encryptionManager;
     /**
      * creates new thread
      * @param address - the socket addres
      * @param port - the socket port
      * @param msgList - a list to store sent messages in (shared between reciever, sender and printer threads)
      */
-    public SendThread(String address, int port, List<Message> msgList, List<Message> messagesToSend){
+    public SendThread(String address, int port, List<Message> msgList, List<Message> messagesToSend, EncryptionManager encryptionManager){
         this.worker = null;
         this.address = address;
         this.port = port;
@@ -44,6 +49,7 @@ public class SendThread implements Runnable{
         this.messagesToSend = messagesToSend;
         this.clientSocket = null;
         this.running = new AtomicBoolean(false);
+        this.encryptionManager = encryptionManager;
     }
 
     public void start(){
@@ -73,14 +79,21 @@ public class SendThread implements Runnable{
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
             // start confirmation thread
-            ConfirmationThread ct = new ConfirmationThread(in, sentMsgList);
+            ConfirmationThread ct = new ConfirmationThread(in, sentMsgList, encryptionManager);
             ct.start();
 
             // send key
 
+            Message pk = new Message( new byte[0],"Friend", MessageType.INIT_PK);
 
+            out.writeObject(pk);
+            out.flush();
 
-
+            while(encryptionManager.getFriendPublicKey() == null){
+                Thread.sleep(500);
+            }
+            System.out.println("RECEIVED PUBLIC KEY: " + encryptionManager.getFriendPublicKey());
+            Message sk = new Message(encryptionManager.generateSessionKey(), "Friend", MessageType.INIT_SK);
             while (true) {
                 if(messagesToSend.size() > 0){
                     Message msg = messagesToSend.remove(0);

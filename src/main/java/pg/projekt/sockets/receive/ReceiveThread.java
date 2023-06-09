@@ -78,6 +78,7 @@ public class ReceiveThread implements Runnable{
             // if user does not accept client socket closed
         ObjectOutputStream out = null;
         ObjectInputStream in = null;
+        byte[] publicKey = new byte[32];
         try
         {
             clientSocket = serverSocket.accept();
@@ -94,7 +95,17 @@ public class ReceiveThread implements Runnable{
             while ((input = in.readObject()) != null) {
                 // Read object from stream
                 Message msg = (Message)input;
-                putMsgOnList(msg);
+                switch (msg.getType()){
+                    case INIT_PK:
+                        publicKey = msg.getPayload();
+                        System.out.println("SENDING PK: " + app.getEncryptionManager().getPublicKey());
+                        out.writeObject(new Message(app.getEncryptionManager().getPublicKey(),"Friend", MessageType.PK));
+                        out.flush();
+                        break;
+                    default:
+                        putMsgOnList(msg);
+                }
+
 
                 // Send confirmation of receiving
                 System.out.println("RECEIVED:" + msg.getUuid().toString());

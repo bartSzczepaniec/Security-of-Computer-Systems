@@ -5,6 +5,7 @@ public enum MessageType {
     FILE,
     CONFIRM,
     INFO,
-    CONNECT,
-    DISCONNECT
+    INIT_PK,
+    INIT_SK,
+    PK,
 }

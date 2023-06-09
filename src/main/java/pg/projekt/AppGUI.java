@@ -259,7 +259,7 @@ public class AppGUI {
                 String chosenIP = ipTextField.getText();
                 int chosenPort = Integer.valueOf(portTextField.getText());
                 System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
-                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent);
+                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent, encryptionManager);
                 // TODO: implment is runniong in SendThread (also Receive)
                 sendThread.start();
 

@@ -3,6 +3,7 @@ package pg.projekt.sockets.send;
 
 import lombok.Getter;
 import lombok.Setter;
+import pg.projekt.EncryptionManager;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
 
@@ -20,11 +21,13 @@ public class ConfirmationThread implements Runnable{
     private AtomicBoolean running;
     private SendThread st;
     private List<Message> sentMsgList;
+    private EncryptionManager encryptionManager;
 
-    public ConfirmationThread(ObjectInputStream in, List<Message> sentMsgList) {
+    public ConfirmationThread(ObjectInputStream in, List<Message> sentMsgList, EncryptionManager encryptionManager) {
         this.in = in;
         this.sentMsgList = sentMsgList;
         this.running = new AtomicBoolean(false);
+        this.encryptionManager = encryptionManager;
     }
 
     public void start(){
@@ -41,7 +44,17 @@ public class ConfirmationThread implements Runnable{
             while ((input = in.readObject()) != null) {
                 // Read object from stream
                 Message msg = (Message) input;
-                putConfirmationOnList(msg);
+                switch(msg.getType()){
+                    case PK:
+                        encryptionManager.setFriendPublicKey(msg.getPayload());
+                        System.out.println("CONFIRM PK");
+                        System.out.println("RECEIVED PUBLIC KEY: " + encryptionManager.getFriendPublicKey().toString());
+                        break;
+                    default:
+                        putConfirmationOnList(msg);
+                        break;
+                }
+
             }
         } catch (IOException | ClassNotFoundException e) {
 

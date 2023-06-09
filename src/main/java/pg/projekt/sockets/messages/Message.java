@@ -23,6 +23,14 @@ public class Message implements Serializable {
     public Message(String content, String sender){
         this(content, sender, MessageType.TEXT);
     }
+
+    public Message(byte[] content, String sender, MessageType type){
+        this.payload = content;
+        this.sender = sender;
+        this.type = type;
+        this.uuid = UUID.randomUUID();
+    }
+
     public Message(String content, String sender, MessageType type){
         this.payload = (content).getBytes(StandardCharsets.UTF_8);
         this.sender = sender;

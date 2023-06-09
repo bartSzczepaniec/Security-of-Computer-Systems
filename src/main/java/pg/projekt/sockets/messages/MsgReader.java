@@ -44,7 +44,7 @@ public class MsgReader implements Runnable{
 
                 for(int i =0; i< msgList.size(); i++){
                     Message s = msgList.get(i);
-                    System.out.println(s.getSender() + ": " + s.getContent() + "|" + s.getUuid().toString());
+                    //System.out.println(s.getSender() + ": " + s.getContent() + "|" + s.getUuid().toString());
                     // append text to currently displayed
                     MessageType type = s.getType();
 

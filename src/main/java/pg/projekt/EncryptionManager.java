@@ -2,6 +2,8 @@ package pg.projekt;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 
 import javax.crypto.Cipher;
@@ -20,6 +22,8 @@ import java.util.Base64;
 import java.util.Random;
 import java.util.Scanner;
 
+@Getter
+@Setter
 public class EncryptionManager {
     private byte[] localKey;
     private byte[] publicKey;
@@ -27,7 +31,10 @@ public class EncryptionManager {
 
     private byte[] sessionKey;
 
+    private volatile byte[] friendPublicKey;
+
     public EncryptionManager() {
+        friendPublicKey = null;
 
     }
 
@@ -104,10 +111,11 @@ public class EncryptionManager {
     }
 
 
-    public void generateSessionKey(){
+    public byte[] generateSessionKey(){
         Random rand = new Random();
         byte[] sessionKey = new byte[32];
         rand.nextBytes(sessionKey);
         this.sessionKey = sessionKey;
+        return sessionKey;
     }
 }
