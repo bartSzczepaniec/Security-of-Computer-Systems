@@ -14,7 +14,7 @@ public class Message implements Serializable {
     private byte[] payload;
     private MessageType type;
     private String sender;
-    private Integer uuid;
+    private UUID uuid;
     private static Integer counter = 0; // TODO CAN BE CHANGED BACK TO UUID
 
     public Message(String content){
@@ -27,9 +27,9 @@ public class Message implements Serializable {
         this.payload = (content).getBytes(StandardCharsets.UTF_8);
         this.sender = sender;
         this.type = type;
-        this.uuid = counter++;
+        this.uuid = UUID.randomUUID();
     }
-    public Message(String content, String sender, MessageType type, Integer uuid){
+    public Message(String content, String sender, MessageType type, UUID uuid){
         this.payload = (content).getBytes(StandardCharsets.UTF_8);
         this.sender = sender;
         this.type = type;
