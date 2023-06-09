@@ -198,7 +198,6 @@ public class AppGUI {
 
     public void sendMessage() {
         //if (cbcRadioButton.isSelected()) {
-            
         //}
         //else { // ecb
 
