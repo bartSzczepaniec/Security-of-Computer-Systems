@@ -18,6 +18,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -87,13 +88,14 @@ public class SendThread implements Runnable{
             Message pk = new Message( new byte[0],"Friend", MessageType.INIT_PK);
 
             out.writeObject(pk);
+
             out.flush();
 
             while(encryptionManager.getFriendPublicKey() == null){
                 Thread.sleep(500);
             }
-            System.out.println("RECEIVED PUBLIC KEY: " + encryptionManager.getFriendPublicKey());
-            Message sk = new Message(encryptionManager.generateSessionKey(), "Friend", MessageType.INIT_SK);
+            System.out.println("RECEIVED PUBLIC KEY");
+            Message sk = new Message(encryptionManager.generateSessionKey(), "Friend", MessageType.SK);
             while (true) {
                 if(messagesToSend.size() > 0){
                     Message msg = messagesToSend.remove(0);

@@ -6,6 +6,6 @@ public enum MessageType {
     CONFIRM,
     INFO,
     INIT_PK,
-    INIT_SK,
     PK,
+    SK
 }

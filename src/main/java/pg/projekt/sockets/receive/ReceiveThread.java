@@ -11,6 +11,8 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -98,7 +100,7 @@ public class ReceiveThread implements Runnable{
                 switch (msg.getType()){
                     case INIT_PK:
                         publicKey = msg.getPayload();
-                        System.out.println("SENDING PK: " + app.getEncryptionManager().getPublicKey());
+                        System.out.println("SENDING PK");
                         out.writeObject(new Message(app.getEncryptionManager().getPublicKey(),"Friend", MessageType.PK));
                         out.flush();
                         break;

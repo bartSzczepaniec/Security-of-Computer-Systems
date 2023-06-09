@@ -170,6 +170,7 @@ public class AppGUI {
                         FileWriter fileWriter = new FileWriter("src/main/resources/EncryptionKey/password.txt");
                         fileWriter.write(passwordHash);
                         fileWriter.close();
+
                         passwordIsOk = true;
                     }
                 }

@@ -10,6 +10,8 @@ import pg.projekt.sockets.messages.MessageType;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -48,7 +50,7 @@ public class ConfirmationThread implements Runnable{
                     case PK:
                         encryptionManager.setFriendPublicKey(msg.getPayload());
                         System.out.println("CONFIRM PK");
-                        System.out.println("RECEIVED PUBLIC KEY: " + encryptionManager.getFriendPublicKey().toString());
+                        System.out.println("RECEIVED PUBLIC KEY");
                         break;
                     default:
                         putConfirmationOnList(msg);
