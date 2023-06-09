@@ -4,5 +4,7 @@ public enum MessageType {
     TEXT,
     FILE,
     CONFIRM,
-    INFO
+    INFO,
+    CONNECT,
+    DISCONNECT
 }

@@ -3,6 +3,7 @@ package pg.projekt;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MsgReader;
 import pg.projekt.sockets.receive.ReceiveThread;
+import pg.projekt.sockets.receive.CheckThread;
 import pg.projekt.sockets.send.SendThread;
 
 import javax.swing.*;
@@ -41,6 +42,7 @@ public class AppGUI {
 
     private ReceiveThread receiveThread;
     private SendThread sendThread;
+    private CheckThread checkThread;
     private MsgReader msgReader;
 
     private int myPort;
@@ -107,11 +109,14 @@ public class AppGUI {
         this.msgList = Collections.synchronizedList(new ArrayList<Message>());
         this.toBeSent = Collections.synchronizedList(new ArrayList<Message>());
 
-        this.receiveThread = new ReceiveThread(msgList, myPort);
+        this.receiveThread = new ReceiveThread(msgList, myPort, sendThread);
         this.receiveThread.start();
 
         this.msgReader = new MsgReader(msgList, messagesPane);
         this.msgReader.start();
+
+        this.checkThread = new CheckThread(receiveThread);
+        this.checkThread.start();
     }
 
     private boolean enterPassword() throws IOException {
@@ -272,7 +277,10 @@ public class AppGUI {
                 try {
                     // close sockets
                     sendThread.getClientSocket().close();
-                    receiveThread.getClientSocket().close();
+                    if ( receiveThread.getClientSocket() != null){
+                        receiveThread.getClientSocket().close();
+                    }
+
                     receiveThread.getServerSocket().close();
                     // wait for reciever thread to finish
                     receiveThread.getWorker().join();
@@ -285,6 +293,7 @@ public class AppGUI {
 
                 } catch (IOException | NullPointerException | InterruptedException ex) {
                     System.err.println("Closed not exisiting connection");
+                    System.err.println(ex);
                     setConnectionButtons(true);
                 }
             }

@@ -3,8 +3,10 @@ package pg.projekt.sockets.receive;
 import lombok.*;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
+import pg.projekt.sockets.send.SendThread;
 
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -20,6 +22,8 @@ public class ReceiveThread implements Runnable{
     private ServerSocket serverSocket;
     private Thread worker;
 
+    private SendThread sendThread;
+
     private List<Message> receivedMsgList;
     private int port;
     private AtomicBoolean running;
@@ -30,13 +34,14 @@ public class ReceiveThread implements Runnable{
      * @param msgList - a list to store recieved messages in (shared between reciever, sender and printer threads)
      * @param port - port number to create ServerSocket on
      */
-    public ReceiveThread(List<Message> msgList, int port){
+    public ReceiveThread(List<Message> msgList, int port, SendThread sendThread){
         this.serverSocket = null;
         this.port = port;
         this.worker = null;
         this.receivedMsgList = msgList;
         this.running = new AtomicBoolean(false);
         this.clientSocket = null;
+        this.sendThread = sendThread;
     }
 
     /**
@@ -65,14 +70,21 @@ public class ReceiveThread implements Runnable{
         this.receivedMsgList.add(msg);
     }
 
+
     @Override
     public void run(){
+
             // if user does not accept client socket closed
         ObjectOutputStream out = null;
         ObjectInputStream in = null;
         try
         {
             clientSocket = serverSocket.accept();
+            // TODO: tworzy sendthread'a
+            String add = ((InetSocketAddress)clientSocket.getRemoteSocketAddress()).getAddress().getHostAddress();
+            System.out.println("CONNECTED FROM: " + add);
+
+            
             out = new ObjectOutputStream(clientSocket.getOutputStream()); // ev. for msg confirmation
             in = new ObjectInputStream(clientSocket.getInputStream());
 
