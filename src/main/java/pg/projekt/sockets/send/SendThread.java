@@ -17,6 +17,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -95,7 +96,16 @@ public class SendThread implements Runnable{
                 Thread.sleep(500);
             }
             System.out.println("RECEIVED PUBLIC KEY");
-            Message sk = new Message(encryptionManager.generateSessionKey(), "Friend", MessageType.SK);
+
+            // sending encrypted session key
+            byte[] sessionKey = encryptionManager.generateSessionKey();
+            System.out.println("GENERATED SESSION KEY" + new String(sessionKey, StandardCharsets.UTF_8));
+            Message sk = new Message(encryptionManager.encryptRSA(sessionKey, encryptionManager.getFriendPublicKey(), true), "Friend", MessageType.SK);
+
+            out.writeObject(sk);
+
+            out.flush();
+
             while (true) {
                 if(messagesToSend.size() > 0){
                     Message msg = messagesToSend.remove(0);

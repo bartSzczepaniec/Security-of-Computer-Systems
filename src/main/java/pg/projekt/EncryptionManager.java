@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 
 import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -15,9 +16,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.Random;
 import java.util.Scanner;
@@ -108,6 +110,48 @@ public class EncryptionManager {
         byte[] result = cipher.doFinal(data);
 
         return  result;
+    }
+
+    @SneakyThrows
+    public byte[] encryptRSA(byte[] data, byte[] key, boolean isPublic) {
+        Cipher cipher = Cipher.getInstance("RSA");
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        EncodedKeySpec keySpec = new X509EncodedKeySpec(key);
+        Key encryptionKey;
+        if (isPublic) {
+            keySpec = new X509EncodedKeySpec(key);
+            encryptionKey = keyFactory.generatePublic(keySpec);
+        }
+        else {
+            keySpec = new PKCS8EncodedKeySpec(key);
+            encryptionKey = keyFactory.generatePrivate(keySpec);
+        }
+
+        cipher.init(Cipher.ENCRYPT_MODE, encryptionKey);
+        byte[] result = cipher.doFinal(data);
+        return result;
+    }
+
+    @SneakyThrows
+    public byte[] decryptRSA(byte[] data, byte[] key, boolean isPublic) {
+        Cipher cipher = Cipher.getInstance("RSA");
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        EncodedKeySpec keySpec;
+        Key decryptionKey;
+        if (isPublic) {
+            keySpec = new X509EncodedKeySpec(key);
+            decryptionKey = keyFactory.generatePublic(keySpec);
+        }
+        else {
+            keySpec = new PKCS8EncodedKeySpec(key);
+            decryptionKey = keyFactory.generatePrivate(keySpec);
+        }
+
+        cipher.init(Cipher.DECRYPT_MODE, decryptionKey);
+        byte[] result = cipher.doFinal(data);
+        return result;
     }
 
 
