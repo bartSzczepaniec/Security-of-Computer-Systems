@@ -1,6 +1,7 @@
 package pg.projekt.sockets.receive;
 
 import lombok.*;
+import pg.projekt.AppGUI;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
 import pg.projekt.sockets.send.SendThread;
@@ -22,7 +23,7 @@ public class ReceiveThread implements Runnable{
     private ServerSocket serverSocket;
     private Thread worker;
 
-    private SendThread sendThread;
+    private AppGUI app;
 
     private List<Message> receivedMsgList;
     private int port;
@@ -34,14 +35,14 @@ public class ReceiveThread implements Runnable{
      * @param msgList - a list to store recieved messages in (shared between reciever, sender and printer threads)
      * @param port - port number to create ServerSocket on
      */
-    public ReceiveThread(List<Message> msgList, int port, SendThread sendThread){
+    public ReceiveThread(List<Message> msgList, int port, AppGUI app){
         this.serverSocket = null;
         this.port = port;
         this.worker = null;
         this.receivedMsgList = msgList;
         this.running = new AtomicBoolean(false);
         this.clientSocket = null;
-        this.sendThread = sendThread;
+        this.app = app;
     }
 
     /**
@@ -81,10 +82,11 @@ public class ReceiveThread implements Runnable{
         {
             clientSocket = serverSocket.accept();
             // TODO: tworzy sendthread'a
-            String add = ((InetSocketAddress)clientSocket.getRemoteSocketAddress()).getAddress().getHostAddress();
-            System.out.println("CONNECTED FROM: " + add);
+            //String add = ((InetSocketAddress)clientSocket.getRemoteSocketAddress()).getAddress().getHostAddress();
+            //System.out.println("CONNECTED FROM: " + add);
+            //this.app.setSendThread(new SendThread(add, 10000, app.getMsgList(), app.getToBeSent()));
+            //this.app.getSendThread().start();
 
-            
             out = new ObjectOutputStream(clientSocket.getOutputStream()); // ev. for msg confirmation
             in = new ObjectInputStream(clientSocket.getInputStream());
 

@@ -1,5 +1,7 @@
 package pg.projekt;
 
+import lombok.Getter;
+import lombok.Setter;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MsgReader;
 import pg.projekt.sockets.receive.ReceiveThread;
@@ -16,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@Getter
+@Setter
 public class AppGUI {
     private JFrame frame;
     private JPanel mainPanel;
@@ -109,7 +113,7 @@ public class AppGUI {
         this.msgList = Collections.synchronizedList(new ArrayList<Message>());
         this.toBeSent = Collections.synchronizedList(new ArrayList<Message>());
 
-        this.receiveThread = new ReceiveThread(msgList, myPort, sendThread);
+        this.receiveThread = new ReceiveThread(msgList, myPort, this);
         this.receiveThread.start();
 
         this.msgReader = new MsgReader(msgList, messagesPane);
