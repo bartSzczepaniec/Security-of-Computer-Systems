@@ -2,6 +2,7 @@ package pg.projekt.sockets.receive;
 
 import lombok.*;
 import pg.projekt.AppGUI;
+import pg.projekt.EncryptionManager;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
 import pg.projekt.sockets.send.SendThread;
@@ -106,7 +107,7 @@ public class ReceiveThread implements Runnable{
                         break;
                     case SK:
                         byte[] encryptedSessionKey = msg.getPayload();
-                        byte[] sessionKey = app.getEncryptionManager().decryptRSA(encryptedSessionKey, app.getEncryptionManager().getPrivateKey(), false);
+                        byte[] sessionKey = EncryptionManager.decryptRSA(encryptedSessionKey, app.getEncryptionManager().getPrivateKey(), false);
                         app.getEncryptionManager().setSessionKey(sessionKey);
                         System.out.println("RECEIVER: RECEIVED SESSION KEY"); //+ new String(sessionKey, StandardCharsets.UTF_8));
                         break;

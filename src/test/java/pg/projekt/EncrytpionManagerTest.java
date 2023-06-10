@@ -23,16 +23,15 @@ public class EncrytpionManagerTest
     @Test
     public void aesEncryptionCBCTest()
     {
-        EncryptionManager em = new EncryptionManager();
 
         byte[] key = em.generateSessionKey();
-        byte[] iv  = em.generateRandomBytes(16);
+        byte[] iv  = EncryptionManager.generateRandomBytes(16);
 
 
 
         String data = "Zaszyfrowana wiadomosc";
 
-        byte[] enc = em.encryptAES(data.getBytes(), key, iv, CipherMode.CBC);
+        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), key, iv, CipherMode.CBC);
 
         String result = new String(enc, StandardCharsets.UTF_8);
 
@@ -47,18 +46,17 @@ public class EncrytpionManagerTest
     @Test
     public void aesDecryptionCBCTest()
     {
-        EncryptionManager em = new EncryptionManager();
 
         byte[] key = em.generateSessionKey();
-        byte[] iv  = em.generateRandomBytes(16);
+        byte[] iv  = EncryptionManager.generateRandomBytes(16);
 
 
 
         String data = "Zaszyfrowana wiadomosc";
 
-        byte[] enc = em.encryptAES(data.getBytes(), key, iv, CipherMode.CBC);
+        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), key, iv, CipherMode.CBC);
 
-        byte[] dec = em.decryptAES(enc, key, iv, CipherMode.CBC);
+        byte[] dec = EncryptionManager.decryptAES(enc, key, iv, CipherMode.CBC);
 
         String result = new String(dec, StandardCharsets.UTF_8);
         System.out.println("Teskt przed zaszyfrowaniem: "+ data);
@@ -77,16 +75,15 @@ public class EncrytpionManagerTest
     @Test
     public void aesEncryptionECBTest()
     {
-        EncryptionManager em = new EncryptionManager();
 
         byte[] key = em.generateSessionKey();
-        byte[] iv  = em.generateRandomBytes(16);
+        byte[] iv  = EncryptionManager.generateRandomBytes(16);
 
 
 
         String data = "Zaszyfrowana wiadomosc";
 
-        byte[] enc = em.encryptAES(data.getBytes(), key, iv, CipherMode.ECB);
+        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), key, iv, CipherMode.ECB);
 
 
 
@@ -102,18 +99,17 @@ public class EncrytpionManagerTest
     @Test
     public void aesDecryptionECBTest()
     {
-        EncryptionManager em = new EncryptionManager();
 
         byte[] key = em.generateSessionKey();
-        byte[] iv  = em.generateRandomBytes(16);
+        byte[] iv  = EncryptionManager.generateRandomBytes(16);
 
 
 
         String data = "Zaszyfrowana wiadomosc";
 
-        byte[] enc = em.encryptAES(data.getBytes(), key, iv, CipherMode.ECB);
+        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), key, iv, CipherMode.ECB);
 
-        byte[] dec = em.decryptAES(enc, key, iv, CipherMode.ECB);
+        byte[] dec = EncryptionManager.decryptAES(enc, key, iv, CipherMode.ECB);
 
         String result = new String(dec, StandardCharsets.UTF_8);
         System.out.println("Teskt przed zaszyfrowaniem: "+ data);

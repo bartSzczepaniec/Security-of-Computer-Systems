@@ -156,7 +156,7 @@ public class EncryptionManager {
         return  result;
     }
     @SneakyThrows
-    public byte[] encryptRSA(byte[] data, byte[] key, boolean isPublic) {
+    public static byte[] encryptRSA(byte[] data, byte[] key, boolean isPublic) {
         Cipher cipher = Cipher.getInstance("RSA");
 
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -177,7 +177,7 @@ public class EncryptionManager {
     }
 
     @SneakyThrows
-    public byte[] decryptRSA(byte[] data, byte[] key, boolean isPublic) {
+    public static byte[] decryptRSA(byte[] data, byte[] key, boolean isPublic) {
         Cipher cipher = Cipher.getInstance("RSA");
 
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -197,7 +197,7 @@ public class EncryptionManager {
         return result;
     }
 
-    public byte[] generateRandomBytes(int n){
+    public static byte[] generateRandomBytes(int n){
         Random rand = new Random();
         byte[] result = new byte[n];
         rand.nextBytes(result);

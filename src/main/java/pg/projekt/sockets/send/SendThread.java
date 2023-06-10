@@ -100,7 +100,7 @@ public class SendThread implements Runnable{
             // sending encrypted session key
             byte[] sessionKey = encryptionManager.generateSessionKey();
             System.out.println("SENDER: GENERATED SESSION KEY");// + new String(sessionKey, StandardCharsets.UTF_8));
-            Message sk = new Message(encryptionManager.encryptRSA(sessionKey, encryptionManager.getFriendPublicKey(), true), "Friend", MessageType.SK);
+            Message sk = new Message(EncryptionManager.encryptRSA(sessionKey, encryptionManager.getFriendPublicKey(), true), "Friend", MessageType.SK);
 
             out.writeObject(sk);
             out.flush();
