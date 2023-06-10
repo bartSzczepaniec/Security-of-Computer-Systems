@@ -87,7 +87,7 @@ public class EncryptionManager {
     }
 
     @SneakyThrows
-    public byte[] encryptAES(byte[] data, byte[] key, byte[] iv, CipherMode mode){
+    public static byte[] encryptAES(byte[] data, byte[] key, byte[] iv, CipherMode mode){
         Cipher cipher = null;
 
         IvParameterSpec ivspec = new IvParameterSpec(iv);
@@ -114,7 +114,7 @@ public class EncryptionManager {
     }
 
     @SneakyThrows
-    public byte[] encryptAES(byte[] data, byte[] key){
+    public static byte[] encryptAES(byte[] data, byte[] key){
 
 
         byte[] iv = new byte[16];
@@ -130,7 +130,7 @@ public class EncryptionManager {
 
 
     @SneakyThrows
-    public byte[] decryptAES(byte[] data, byte[] key, byte[] iv, CipherMode mode){
+    public static byte[] decryptAES(byte[] data, byte[] key, byte[] iv, CipherMode mode){
         Cipher cipher = null;
 
         IvParameterSpec ivspec = new IvParameterSpec(iv);

@@ -2,6 +2,8 @@ package pg.projekt.sockets.messages;
 
 
 import lombok.*;
+import pg.projekt.CipherMode;
+import pg.projekt.EncryptionManager;
 
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -47,6 +49,17 @@ public class Message implements Serializable {
         String payloadString = new String(this.payload, StandardCharsets.UTF_8);
         return payloadString;
 
+    }
+
+    public void encryptPayload(byte[] key, byte[] iv, CipherMode mode){
+        byte[] encryptedPayload = EncryptionManager.encryptAES(payload, key, iv, mode);
+        this.payload = encryptedPayload;
+
+    }
+
+    public void decryptPayload(byte[] key, byte[] iv, CipherMode mode) {
+        byte[] decryptedPayload = EncryptionManager.decryptAES(payload, key, iv, mode);
+        this.payload = decryptedPayload;
     }
 
     @Override
