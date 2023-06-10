@@ -7,8 +7,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
@@ -20,7 +18,6 @@ import java.security.*;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -90,24 +87,43 @@ public class EncryptionManager {
     }
 
     @SneakyThrows
+    public byte[] encryptAES(byte[] data, byte[] key, byte[] iv, CipherMode mode){
+        Cipher cipher = null;
+
+        IvParameterSpec ivspec = new IvParameterSpec(iv);
+
+        SecretKeySpec aesKey = new SecretKeySpec(key, "AES");
+
+        switch(mode){
+            case CBC:
+                cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+
+                cipher.init(Cipher.ENCRYPT_MODE, aesKey, ivspec);
+
+                break;
+            case ECB:
+                cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+
+                cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+                break;
+        }
+
+        byte[] result = cipher.doFinal(data);
+
+        return  result;
+    }
+
+    @SneakyThrows
     public byte[] encryptAES(byte[] data, byte[] key){
+
+
         byte[] iv = new byte[16];
         // IV as 16 first bytes of key
         for(int i =0 ;i < iv.length; i++){
             iv[i]= key[i];
         }
 
-
-
-        IvParameterSpec ivspec = new IvParameterSpec(iv);
-
-        SecretKeySpec aesKey = new SecretKeySpec(key, "AES");
-
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-
-        cipher.init(Cipher.ENCRYPT_MODE, aesKey, ivspec);
-
-        byte[] result = cipher.doFinal(data);
+        byte[] result = encryptAES(data, key, iv, CipherMode.ECB);
 
         return  result;
     }

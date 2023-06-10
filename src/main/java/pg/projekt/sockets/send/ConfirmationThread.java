@@ -47,10 +47,10 @@ public class ConfirmationThread implements Runnable{
                 // Read object from stream
                 Message msg = (Message) input;
                 switch(msg.getType()){
-                    case PK:
-                        encryptionManager.setFriendPublicKey(msg.getPayload());
-                        System.out.println("CONFIRM PK");
-                        System.out.println("RECEIVED PUBLIC KEY");
+                    case PK: // message contains public key
+                        byte[] friendPublicKey = msg.getPayload();
+                        encryptionManager.setFriendPublicKey(friendPublicKey);
+                        System.out.println("CONFIRMATION THREAD: RECEIVED PK");
                         break;
                     default:
                         putConfirmationOnList(msg);
