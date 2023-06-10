@@ -128,6 +128,33 @@ public class EncryptionManager {
         return  result;
     }
 
+
+    @SneakyThrows
+    public byte[] decryptAES(byte[] data, byte[] key, byte[] iv, CipherMode mode){
+        Cipher cipher = null;
+
+        IvParameterSpec ivspec = new IvParameterSpec(iv);
+
+        SecretKeySpec aesKey = new SecretKeySpec(key, "AES");
+
+        switch(mode){
+            case CBC:
+                cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+
+                cipher.init(Cipher.DECRYPT_MODE, aesKey, ivspec);
+
+                break;
+            case ECB:
+                cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+
+                cipher.init(Cipher.DECRYPT_MODE, aesKey);
+                break;
+        }
+
+        byte[] result = cipher.doFinal(data);
+
+        return  result;
+    }
     @SneakyThrows
     public byte[] encryptRSA(byte[] data, byte[] key, boolean isPublic) {
         Cipher cipher = Cipher.getInstance("RSA");
@@ -170,11 +197,15 @@ public class EncryptionManager {
         return result;
     }
 
+    public byte[] generateRandomBytes(int n){
+        Random rand = new Random();
+        byte[] result = new byte[n];
+        rand.nextBytes(result);
+        return result;
+    }
 
     public byte[] generateSessionKey(){
-        Random rand = new Random();
-        byte[] sessionKey = new byte[32];
-        rand.nextBytes(sessionKey);
+        byte[] sessionKey = generateRandomBytes(32);
         this.sessionKey = sessionKey;
         return sessionKey;
     }

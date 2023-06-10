@@ -95,16 +95,16 @@ public class SendThread implements Runnable{
             while(encryptionManager.getFriendPublicKey() == null){
                 Thread.sleep(500);
             }
-            System.out.println("RECEIVED PUBLIC KEY");
+            System.out.println("SENDER: RECEIVED PUBLIC KEY");
 
             // sending encrypted session key
             byte[] sessionKey = encryptionManager.generateSessionKey();
-            System.out.println("GENERATED SESSION KEY" + new String(sessionKey, StandardCharsets.UTF_8));
+            System.out.println("SENDER: GENERATED SESSION KEY");// + new String(sessionKey, StandardCharsets.UTF_8));
             Message sk = new Message(encryptionManager.encryptRSA(sessionKey, encryptionManager.getFriendPublicKey(), true), "Friend", MessageType.SK);
 
             out.writeObject(sk);
-
             out.flush();
+            System.out.println("SENDER: SENT SESSION KEY");
 
             while (true) {
                 if(messagesToSend.size() > 0){
@@ -113,7 +113,7 @@ public class SendThread implements Runnable{
                     try{
                         putMsgOnList(msg);
                         out.writeObject(msg);
-                        System.out.println("SENT");
+                        System.out.println("SENDER: MSG SENT");
                         out.flush();
                     }catch(ArrayIndexOutOfBoundsException ex){
                         System.err.println("SENDER: invalid message");

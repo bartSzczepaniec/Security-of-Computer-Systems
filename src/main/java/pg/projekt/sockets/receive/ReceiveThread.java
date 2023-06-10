@@ -108,7 +108,7 @@ public class ReceiveThread implements Runnable{
                         byte[] encryptedSessionKey = msg.getPayload();
                         byte[] sessionKey = app.getEncryptionManager().decryptRSA(encryptedSessionKey, app.getEncryptionManager().getPrivateKey(), false);
                         app.getEncryptionManager().setSessionKey(sessionKey);
-                        System.out.println("RECEIVER: RECEIVED SESSION KEY" + new String(sessionKey, StandardCharsets.UTF_8));
+                        System.out.println("RECEIVER: RECEIVED SESSION KEY"); //+ new String(sessionKey, StandardCharsets.UTF_8));
                         break;
                     default:
                         putMsgOnList(msg);
