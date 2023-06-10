@@ -2,6 +2,7 @@ package pg.projekt.sockets.receive;
 
 import lombok.*;
 import pg.projekt.AppGUI;
+import pg.projekt.CipherMode;
 import pg.projekt.EncryptionManager;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
@@ -98,6 +99,8 @@ public class ReceiveThread implements Runnable{
             while ((input = in.readObject()) != null) {
                 // Read object from stream
                 Message msg = (Message)input;
+                //decrypt the message
+
                 switch (msg.getType()){
                     case INIT_PK:
                         publicKey = msg.getPayload();
@@ -112,6 +115,9 @@ public class ReceiveThread implements Runnable{
                         System.out.println("RECEIVER: RECEIVED SESSION KEY"); //+ new String(sessionKey, StandardCharsets.UTF_8));
                         break;
                     default:
+                        byte[] iv = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+
+                        msg.decryptPayload(app.getEncryptionManager().getSessionKey(),iv , CipherMode.CBC);
                         putMsgOnList(msg);
                 }
 

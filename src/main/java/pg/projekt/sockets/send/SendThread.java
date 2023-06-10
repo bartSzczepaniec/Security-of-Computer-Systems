@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.checkerframework.checker.units.qual.A;
 import pg.projekt.App;
 import pg.projekt.AppGUI;
+import pg.projekt.CipherMode;
 import pg.projekt.EncryptionManager;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
@@ -84,26 +85,26 @@ public class SendThread implements Runnable{
             ConfirmationThread ct = new ConfirmationThread(in, sentMsgList, encryptionManager);
             ct.start();
 
-            // send key
-
+            // send public key (unencrypted)
             Message pk = new Message( new byte[0],"Friend", MessageType.INIT_PK);
-
             out.writeObject(pk);
-
             out.flush();
 
+            // wait for response from other side
+            // TODO: timeout?
             while(encryptionManager.getFriendPublicKey() == null){
                 Thread.sleep(500);
             }
             System.out.println("SENDER: RECEIVED PUBLIC KEY");
 
-            // sending encrypted session key
+            // sending encrypted session key (RSA)
             byte[] sessionKey = encryptionManager.generateSessionKey();
+            encryptionManager.setSessionKey(sessionKey);
             System.out.println("SENDER: GENERATED SESSION KEY");// + new String(sessionKey, StandardCharsets.UTF_8));
             Message sk = new Message(EncryptionManager.encryptRSA(sessionKey, encryptionManager.getFriendPublicKey(), true), "Friend", MessageType.SK);
-
             out.writeObject(sk);
             out.flush();
+
             System.out.println("SENDER: SENT SESSION KEY");
 
             while (true) {
@@ -112,6 +113,11 @@ public class SendThread implements Runnable{
 
                     try{
                         putMsgOnList(msg);
+
+                        // encrypt message
+                        byte[] iv = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                        msg.encryptPayload(encryptionManager.getSessionKey(), iv,CipherMode.ECB);
+
                         out.writeObject(msg);
                         System.out.println("SENDER: MSG SENT");
                         out.flush();
