@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Unit test for simple App.
  */
-public class EncrytpionManagerTest
+public class EncryptionManagerTest
 {
     private EncryptionManager em;
 
@@ -24,14 +24,14 @@ public class EncrytpionManagerTest
     public void aesEncryptionCBCTest()
     {
 
-        byte[] key = em.generateSessionKey();
+        em.generateAndSetSessionKey();
         byte[] iv  = EncryptionManager.generateRandomBytes(16);
 
 
 
         String data = "Zaszyfrowana wiadomosc";
 
-        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), key, iv, CipherMode.CBC);
+        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), em.getSessionKey(), iv, CipherMode.CBC);
 
         String result = new String(enc, StandardCharsets.UTF_8);
 
@@ -47,16 +47,16 @@ public class EncrytpionManagerTest
     public void aesDecryptionCBCTest()
     {
 
-        byte[] key = em.generateSessionKey();
+        em.generateAndSetSessionKey();
         byte[] iv  = EncryptionManager.generateRandomBytes(16);
 
 
 
         String data = "Zaszyfrowana wiadomosc asd           asedqwr qwbqeqeqwe asd asdasdasdasdouyaspidua psdi asdpoa uspodojuaspdujaso[djua[osdu[aod[oasudu";
 
-        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), key, iv, CipherMode.CBC);
+        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), em.getSessionKey(), iv, CipherMode.CBC);
 
-        byte[] dec = EncryptionManager.decryptAES(enc, key, iv, CipherMode.CBC);
+        byte[] dec = EncryptionManager.decryptAES(enc, em.getSessionKey(), iv, CipherMode.CBC);
 
         String result = new String(dec, StandardCharsets.UTF_8);
         System.out.println("Teskt przed zaszyfrowaniem: "+ data);
@@ -76,14 +76,14 @@ public class EncrytpionManagerTest
     public void aesEncryptionECBTest()
     {
 
-        byte[] key = em.generateSessionKey();
+        em.generateAndSetSessionKey();
         byte[] iv  = EncryptionManager.generateRandomBytes(16);
 
 
 
         String data = "Zaszyfrowana wiadomosc";
 
-        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), key, iv, CipherMode.ECB);
+        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), em.getSessionKey(), iv, CipherMode.ECB);
 
 
 
@@ -100,16 +100,16 @@ public class EncrytpionManagerTest
     public void aesDecryptionECBTest()
     {
 
-        byte[] key = em.generateSessionKey();
+        em.generateAndSetSessionKey();
         byte[] iv  = EncryptionManager.generateRandomBytes(16);
 
 
 
         String data = "Zaszyfrowana wiadomosc asd              asdasdasfasgasgasgasdasdasfass";
 
-        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), key, iv, CipherMode.ECB);
+        byte[] enc = EncryptionManager.encryptAES(data.getBytes(), em.getSessionKey(), iv, CipherMode.ECB);
 
-        byte[] dec = EncryptionManager.decryptAES(enc, key, iv, CipherMode.ECB);
+        byte[] dec = EncryptionManager.decryptAES(enc, em.getSessionKey(), iv, CipherMode.ECB);
 
         String result = new String(dec, StandardCharsets.UTF_8);
         System.out.println("Teskt przed zaszyfrowaniem: "+ data);

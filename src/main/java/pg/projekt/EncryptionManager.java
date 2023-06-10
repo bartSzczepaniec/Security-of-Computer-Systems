@@ -23,13 +23,34 @@ import java.util.Scanner;
 
 @Getter
 @Setter
+/**
+ * An encryption engine for storing and managing keys. It also provides methods for data encryption
+ */
 public class EncryptionManager {
+    /**
+     * Local key - hashed password also used for encryption of RSA private key
+     */
     private byte[] localKey;
+    /**
+     * Public key for RSA encryption (PKI)
+     */
     private byte[] publicKey;
+    /**
+     * Private key for RSA encryption (PKI)
+     */
     private byte[] privateKey;
+    /**
+     * IV for private key encryption
+     */
+    private byte[] privateKeyIV;
 
+    /**
+     * Randomly generated session key for encrypting messages
+     */
     private byte[] sessionKey;
-
+    /**
+     * Public key of a friend for
+     */
     private volatile byte[] friendPublicKey;
 
     public EncryptionManager() {
@@ -37,16 +58,24 @@ public class EncryptionManager {
 
     }
 
-    public void setLocalKey(byte[] localKey) {
-        this.localKey = localKey;
-    }
 
+    /**
+     * Method for hashing a password
+     * @param password - a passowrd to be hashed
+     * @return a hash of password in String format
+     */
     public HashCode shaHashingToString(String password) {
         return Hashing.sha256()
                 .hashString(password, StandardCharsets.UTF_8);
     }
 
-    // Checking if hash of entered password equals the hash saved in the file
+    /**
+     * A method for checking if provided password is correct
+     * @param hashedPassword - hashed password
+     * @param passwordFile - a path to file with the hashed password
+     * @return - true if given password was correct and false if not
+     * @throws FileNotFoundException
+     */
     public boolean isPasswordCorrect(String hashedPassword, File passwordFile) throws FileNotFoundException {
         Scanner scanner = new Scanner(passwordFile);
         if (scanner.hasNextLine()) {
@@ -57,23 +86,26 @@ public class EncryptionManager {
         return false;
     }
 
+    /**
+     * A method to generate a pair of RSA keys (PKI)
+     * @return - returns the result of the operation (false if creation was unsuccessful)
+     */
     public boolean generateRSAkeys(){
         try{
+            // generate a pair of keys
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
             generator.initialize(2048);
             KeyPair pair = generator.generateKeyPair();
 
-            // save to file
+            // Public key - save to file
             FileOutputStream fos = new FileOutputStream("src/main/resources/publicKey/public.key");
-            fos.write(pair.getPublic().getEncoded());
             publicKey = pair.getPublic().getEncoded();
+            fos.write(publicKey);
             fos.close();
 
-
+            // Private key - encrypt with local key and save to file
             privateKey = pair.getPrivate().getEncoded();
-            // encrypt and save private key
             byte[] encryptedPrivateKey = encryptAES(pair.getPrivate().getEncoded(), localKey);
-
             FileOutputStream fosPrivate = new FileOutputStream("src/main/resources/privateKey/private.key");
             fosPrivate.write(encryptedPrivateKey);
             fosPrivate.close();
@@ -81,78 +113,95 @@ public class EncryptionManager {
             return true;
         }catch(RuntimeException | NoSuchAlgorithmException | IOException ex){
             System.err.println("Key generation failed");
+            // Uninitialise the keys to avoid confusion
+            publicKey = null;
+            privateKey = null;
             return false;
         }
 
     }
 
+    /**
+     * Method for realizoing AES encryption
+     * @param data - the data to be encrypted
+     * @param key - the key to be used during encryption
+     * @param iv - the initialization vector to be used during encryption (does not matter in ECB mode)
+     * @param mode - mode (currently ECB or CBC
+     * @return - returns a byte array - encrypted data
+     */
     @SneakyThrows
     public static byte[] encryptAES(byte[] data, byte[] key, byte[] iv, CipherMode mode){
+
         Cipher cipher = null;
-
-        IvParameterSpec ivspec = new IvParameterSpec(iv);
-
         SecretKeySpec aesKey = new SecretKeySpec(key, "AES");
 
         switch(mode){
-            case CBC:
+            case CBC: // operations for CBC mode
                 cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-
+                IvParameterSpec ivspec = new IvParameterSpec(iv);
                 cipher.init(Cipher.ENCRYPT_MODE, aesKey, ivspec);
-
                 break;
-            case ECB:
+
+            case ECB: // operations for ECB mode
                 cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-
                 cipher.init(Cipher.ENCRYPT_MODE, aesKey);
+
                 break;
         }
 
+        // do final encryption
         byte[] result = cipher.doFinal(data);
-
+        // return encrypted data
         return  result;
     }
 
+    /**
+     * AES encryption - used for Private Key encryption
+     * @param data - data to be encrypted
+     * @param key - key to encrypt the data with
+     * @return - encrypted data
+     */
     @SneakyThrows
-    public static byte[] encryptAES(byte[] data, byte[] key){
+    public byte[] encryptAES(byte[] data, byte[] key){
 
-
-        byte[] iv = new byte[16];
-        // IV as 16 first bytes of key
-        for(int i =0 ;i < iv.length; i++){
-            iv[i]= key[i];
-        }
-
-        byte[] result = encryptAES(data, key, iv, CipherMode.ECB);
-
+        // generate the iv and store in memory
+        byte[] iv = generateRandomBytes(16);
+        privateKeyIV = iv;
+        // CBC mode as required
+        byte[] result = encryptAES(data, key, iv, CipherMode.CBC);
         return  result;
     }
 
 
+    /**
+     * A method for AES decryption
+     * @param data - encrypted data to be decrypted
+     * @param key - key for decryption
+     * @param iv - iv for decryption
+     * @param mode - AES mode
+     * @return - a byte array of decrypted data
+     */
     @SneakyThrows
     public static byte[] decryptAES(byte[] data, byte[] key, byte[] iv, CipherMode mode){
         Cipher cipher = null;
-
-        IvParameterSpec ivspec = new IvParameterSpec(iv);
-
         SecretKeySpec aesKey = new SecretKeySpec(key, "AES");
 
         switch(mode){
-            case CBC:
+            case CBC: // operations for CBC mode
                 cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-
+                IvParameterSpec ivspec = new IvParameterSpec(iv);
                 cipher.init(Cipher.DECRYPT_MODE, aesKey, ivspec);
-
                 break;
-            case ECB:
-                cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
 
+            case ECB: // operations for ECB mode
+                cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
                 cipher.init(Cipher.DECRYPT_MODE, aesKey);
                 break;
+
         }
 
+        // decrypt data and return results
         byte[] result = cipher.doFinal(data);
-
         return  result;
     }
     @SneakyThrows
@@ -197,6 +246,11 @@ public class EncryptionManager {
         return result;
     }
 
+    /**
+     * Random byte array generator
+     * @param n - the length of array
+     * @return the array of length n with random bytes
+     */
     public static byte[] generateRandomBytes(int n){
         Random rand = new Random();
         byte[] result = new byte[n];
@@ -204,7 +258,11 @@ public class EncryptionManager {
         return result;
     }
 
-    public byte[] generateSessionKey(){
+    /**
+     * Session key generator - also sets the sessionKey
+     * @return - return the session key
+     */
+    public byte[] generateAndSetSessionKey(){
         byte[] sessionKey = generateRandomBytes(32);
         this.sessionKey = sessionKey;
         return sessionKey;

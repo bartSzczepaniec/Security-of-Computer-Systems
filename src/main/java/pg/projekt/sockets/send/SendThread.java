@@ -38,13 +38,17 @@ public class SendThread implements Runnable{
     private AtomicBoolean running;
 
     private EncryptionManager encryptionManager;
+
+    private boolean isInitializer;
     /**
      * creates new thread
      * @param address - the socket addres
      * @param port - the socket port
      * @param msgList - a list to store sent messages in (shared between reciever, sender and printer threads)
+     * @param messagesToSend - a list from which to get messages that need to be sent
+     * @param encryptionManager - encryption manager to manage keys
      */
-    public SendThread(String address, int port, List<Message> msgList, List<Message> messagesToSend, EncryptionManager encryptionManager){
+    public SendThread(String address, int port, List<Message> msgList, List<Message> messagesToSend, EncryptionManager encryptionManager, boolean isInitializer){
         this.worker = null;
         this.address = address;
         this.port = port;
@@ -53,8 +57,12 @@ public class SendThread implements Runnable{
         this.clientSocket = null;
         this.running = new AtomicBoolean(false);
         this.encryptionManager = encryptionManager;
+        this.isInitializer = isInitializer;
     }
 
+    /**
+     * A method for initalizing and starting the thread
+     */
     public void start(){
         this.worker = new Thread(this);
         worker.start();
@@ -73,12 +81,13 @@ public class SendThread implements Runnable{
 
     @Override
     public void run(){
-        // read messages from socket until the ned
-
+        // init streams
         ObjectOutputStream out =null;
         ObjectInputStream in = null;
         try{
+            // create new socket
             clientSocket = new Socket(address, port);
+            // init in/out streams
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
             // start confirmation thread
@@ -86,39 +95,45 @@ public class SendThread implements Runnable{
             ct.start();
 
             // send public key (unencrypted)
-            Message pk = new Message( new byte[0],"Friend", MessageType.INIT_PK);
-            out.writeObject(pk);
-            out.flush();
+            if(isInitializer){
+                Message pk = new Message( new byte[0],"Friend", MessageType.INIT_PK);
+                out.writeObject(pk);
+                out.flush();
 
-            // wait for response from other side
-            // TODO: timeout?
-            while(encryptionManager.getFriendPublicKey() == null){
-                Thread.sleep(500);
+                // wait for response from other side
+                // TODO: timeout?
+                while(encryptionManager.getFriendPublicKey() == null){
+                    Thread.sleep(500);
+                }
+                System.out.println("SENDER: RECEIVED PUBLIC KEY");
+
+                // sending encrypted session key (RSA)
+                byte[] sessionKey = encryptionManager.generateAndSetSessionKey();
+                encryptionManager.setSessionKey(sessionKey);
+                System.out.println("SENDER: GENERATED SESSION KEY");// + new String(sessionKey, StandardCharsets.UTF_8));
+                Message sk = new Message(EncryptionManager.encryptRSA(sessionKey, encryptionManager.getFriendPublicKey(), true), "Friend", MessageType.SK);
+                out.writeObject(sk);
+                out.flush();
+                String sess_key = new String(sessionKey, StandardCharsets.UTF_8);
+                System.out.print("SENDER: SENT SESSION KEY - ");
+                System.out.println(sess_key);
             }
-            System.out.println("SENDER: RECEIVED PUBLIC KEY");
 
-            // sending encrypted session key (RSA)
-            byte[] sessionKey = encryptionManager.generateSessionKey();
-            encryptionManager.setSessionKey(sessionKey);
-            System.out.println("SENDER: GENERATED SESSION KEY");// + new String(sessionKey, StandardCharsets.UTF_8));
-            Message sk = new Message(EncryptionManager.encryptRSA(sessionKey, encryptionManager.getFriendPublicKey(), true), "Friend", MessageType.SK);
-            out.writeObject(sk);
-            out.flush();
-            String sess_key = new String(sessionKey, StandardCharsets.UTF_8);
-            System.out.print("SENDER: SENT SESSION KEY - ");
-            System.out.println(sess_key);
 
+            // read messages to be sent
             while (true) {
+                // get message if waiting
                 if(messagesToSend.size() > 0){
+                    // remove it from the list
                     Message msg = messagesToSend.remove(0);
 
                     try{
+                        // put the message on sent list
                         putMsgOnList(msg);
 
                         // encrypt message
-                        byte[] iv = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
                         msg.encryptPayload(encryptionManager.getSessionKey(),CipherMode.CBC);
-
+                        // send the message
                         out.writeObject(msg);
                         System.out.println("SENDER: MSG SENT");
                         out.flush();
@@ -131,6 +146,7 @@ public class SendThread implements Runnable{
 
                 Thread.sleep(200);
                 if(clientSocket.isClosed()){
+                    // if socket closed break
                     break;
                 }
             }

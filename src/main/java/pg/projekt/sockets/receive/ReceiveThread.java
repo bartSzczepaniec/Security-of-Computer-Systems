@@ -29,15 +29,18 @@ public class ReceiveThread implements Runnable{
 
     private AppGUI app;
 
+    private EncryptionManager encryptionManager;
     private List<Message> receivedMsgList;
     private int port;
     private AtomicBoolean running;
     private Socket clientSocket;
+    private boolean isInitailzer;
 
     /**
      * creates new thread
      * @param msgList - a list to store recieved messages in (shared between reciever, sender and printer threads)
      * @param port - port number to create ServerSocket on
+     * @param app - app
      */
     public ReceiveThread(List<Message> msgList, int port, AppGUI app){
         this.serverSocket = null;
@@ -47,6 +50,8 @@ public class ReceiveThread implements Runnable{
         this.running = new AtomicBoolean(false);
         this.clientSocket = null;
         this.app = app;
+        this.encryptionManager = app.getEncryptionManager();
+        this.isInitailzer = false;
     }
 
     /**
@@ -79,52 +84,63 @@ public class ReceiveThread implements Runnable{
     @Override
     public void run(){
 
-            // if user does not accept client socket closed
+        // init streams
         ObjectOutputStream out = null;
         ObjectInputStream in = null;
-        byte[] publicKey = new byte[32];
         try
         {
             clientSocket = serverSocket.accept();
+            // TODO: accept or reject connection
             // TODO: tworzy sendthread'a
-            //String add = ((InetSocketAddress)clientSocket.getRemoteSocketAddress()).getAddress().getHostAddress();
-            //System.out.println("CONNECTED FROM: " + add);
-            //this.app.setSendThread(new SendThread(add, 10000, app.getMsgList(), app.getToBeSent()));
-            //this.app.getSendThread().start();
+            if(!isInitailzer){
+                String add = ((InetSocketAddress)clientSocket.getRemoteSocketAddress()).getAddress().getHostAddress();
+                System.out.println("CONNECTED FROM: " + add);
+                this.app.setSendThread(new SendThread(add, 10000, app.getMsgList(), app.getToBeSent(), encryptionManager, false));
+                this.app.getSendThread().start();
+                this.app.setConnected(true);
+                this.app.setConnectionButtons();
+            }
 
-            out = new ObjectOutputStream(clientSocket.getOutputStream()); // ev. for msg confirmation
+
+
+            // init in/out streams
+            out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
 
             Object input;
             while ((input = in.readObject()) != null) {
                 // Read object from stream
                 Message msg = (Message)input;
-                //decrypt the message
 
                 switch (msg.getType()){
+                    // MSG initializing the conversatoion
                     case INIT_PK:
-                        publicKey = msg.getPayload();
                         System.out.println("RECEIVER: SENDING PK");
-                        out.writeObject(new Message(app.getEncryptionManager().getPublicKey(),"Friend", MessageType.PK));
+                        // send Public key in return
+                        out.writeObject(new Message(encryptionManager.getPublicKey(),"Friend", MessageType.PK));
                         out.flush();
                         break;
                     case SK:
+                        // read sessiong key
                         byte[] encryptedSessionKey = msg.getPayload();
-                        byte[] sessionKey = EncryptionManager.decryptRSA(encryptedSessionKey, app.getEncryptionManager().getPrivateKey(), false);
-                        app.getEncryptionManager().setSessionKey(sessionKey);
+                        byte[] sessionKey = EncryptionManager.decryptRSA(encryptedSessionKey, encryptionManager.getPrivateKey(), false);
+                        // set session key in encryption manager
+                        encryptionManager.setSessionKey(sessionKey);
                         String sess_key = new String(sessionKey, StandardCharsets.UTF_8);
                         System.out.print("RECEIVER: RECEIVED SESSION KEY - ");
                         System.out.println(sess_key);
                         break;
                     default:
-                        byte[] iv = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+                        // decrypt message and put it on list to be read
+                        System.out.println("RECEIVER: before decryption: ");
+                        System.out.println(new String(msg.getPayload(), StandardCharsets.UTF_8));
                         msg.decryptPayload(app.getEncryptionManager().getSessionKey(), CipherMode.CBC);
                         putMsgOnList(msg);
                 }
 
 
                 // Send confirmation of receiving
-                System.out.println("RECEIVED:" + msg.getUuid().toString());
+                //System.out.println("RECEIVED:" + msg.getUuid().toString());
                 Message confirmation = new Message(msg.getUuid().toString(), "Friend", MessageType.CONFIRM);
                 out.writeObject(confirmation);
                 out.flush();

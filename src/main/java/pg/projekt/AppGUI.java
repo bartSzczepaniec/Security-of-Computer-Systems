@@ -55,11 +55,14 @@ public class AppGUI {
 
     private int myPort;
 
+    private boolean isConnected;
+
 
     public AppGUI() {
         frame = new JFrame("Security of Computer Systems");
         jFileChooser = new JFileChooser();
         encryptionManager = new EncryptionManager();
+        isConnected = false;
     }
 
     public void startApp() {
@@ -215,13 +218,15 @@ public class AppGUI {
         }
     }
 
-    public void setConnectionButtons(boolean waitingToConnect){
-        if(waitingToConnect){
-            connectButton.setEnabled(true);
-            disconnectButton.setEnabled(false);
-        }else{
+    public void setConnectionButtons(){
+        if(isConnected){
             connectButton.setEnabled(false);
             disconnectButton.setEnabled(true);
+            msgList.removeAll(msgList);
+            toBeSent.removeAll(toBeSent);
+        }else{
+            connectButton.setEnabled(true);
+            disconnectButton.setEnabled(false);
         }
 
     }
@@ -252,6 +257,7 @@ public class AppGUI {
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                receiveThread.setInitailzer(true);
                 messagesPane.setText("");
                 msgList.removeAll(msgList);
                 toBeSent.removeAll(toBeSent);
@@ -260,7 +266,7 @@ public class AppGUI {
                 String chosenIP = ipTextField.getText();
                 int chosenPort = Integer.valueOf(portTextField.getText());
                 System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
-                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent, encryptionManager);
+                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent, encryptionManager, true);
                 // TODO: implment is runniong in SendThread (also Receive)
                 sendThread.start();
 
@@ -274,10 +280,12 @@ public class AppGUI {
                     throw new RuntimeException(ex);
                 }
                 if(sendThread.getRunning().get()){
-                    setConnectionButtons(false);
+                    isConnected = true;
+                    setConnectionButtons();
                     msgList.add(new Message("Connected"));
                 }else{
-                    setConnectionButtons(true);
+                    isConnected = false;
+                    setConnectionButtons();
                 }
 
 
@@ -286,8 +294,14 @@ public class AppGUI {
 
             }
         });
-
+        /**
+         * Actions for disconnect button
+         */
         disconnectButton.addActionListener(new ActionListener() {
+            /**
+             * Actions to perform when disconnect button is pressed
+             * @param e the event to be processed
+             */
             @Override
             public void actionPerformed(ActionEvent e) {
 
@@ -295,9 +309,10 @@ public class AppGUI {
                     // close sockets
                     sendThread.getClientSocket().close();
                     if ( receiveThread.getClientSocket() != null){
+                        // close client socket if it exists
                         receiveThread.getClientSocket().close();
                     }
-
+                    // close recieveThread socket
                     receiveThread.getServerSocket().close();
                     // wait for reciever thread to finish
                     receiveThread.getWorker().join();
@@ -305,13 +320,19 @@ public class AppGUI {
                     // restart reciever thread - ready for new connections
                     receiveThread.start();
 
-                    setConnectionButtons(true);
+                    // toggle connection buttons
+                    // TODO: state bool - connected/not connected - based on it button state
+                    isConnected = false;
+                    setConnectionButtons();
+                    // Add msg to be displayed
                     msgList.add(new Message("Disconnected"));
 
                 } catch (IOException | NullPointerException | InterruptedException ex) {
-                    System.err.println("Closed not exisiting connection");
+                    System.err.println("Closed not existing connection");
                     System.err.println(ex);
-                    setConnectionButtons(true);
+                    // toggle buttons - also maybe bool state
+                    isConnected = false;
+                    setConnectionButtons();
                 }
             }
         });

@@ -9,6 +9,9 @@ import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+/**
+ * A class representing sent message
+ */
 @Getter
 @Setter
 @EqualsAndHashCode
@@ -20,6 +23,10 @@ public class Message implements Serializable {
     private UUID uuid;
     private static Integer counter = 0; // TODO CAN BE CHANGED BACK TO UUID
 
+    /**
+     * Baisc constructor used for internal messages
+     * @param content - a string content of message
+     */
     public Message(String content){
         this(content, "", MessageType.INFO);
         this.iv = EncryptionManager.generateRandomBytes(16);
