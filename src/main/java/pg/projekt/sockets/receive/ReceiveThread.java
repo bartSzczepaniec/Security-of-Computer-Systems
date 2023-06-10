@@ -112,12 +112,13 @@ public class ReceiveThread implements Runnable{
                         byte[] encryptedSessionKey = msg.getPayload();
                         byte[] sessionKey = EncryptionManager.decryptRSA(encryptedSessionKey, app.getEncryptionManager().getPrivateKey(), false);
                         app.getEncryptionManager().setSessionKey(sessionKey);
-                        System.out.println("RECEIVER: RECEIVED SESSION KEY"); //+ new String(sessionKey, StandardCharsets.UTF_8));
+                        String sess_key = new String(sessionKey, StandardCharsets.UTF_8);
+                        System.out.print("RECEIVER: RECEIVED SESSION KEY - ");
+                        System.out.println(sess_key);
                         break;
                     default:
                         byte[] iv = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-                        msg.decryptPayload(app.getEncryptionManager().getSessionKey(),iv , CipherMode.CBC);
+                        msg.decryptPayload(app.getEncryptionManager().getSessionKey(), CipherMode.CBC);
                         putMsgOnList(msg);
                 }
 

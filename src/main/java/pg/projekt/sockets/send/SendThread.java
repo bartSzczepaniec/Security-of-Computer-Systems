@@ -104,8 +104,9 @@ public class SendThread implements Runnable{
             Message sk = new Message(EncryptionManager.encryptRSA(sessionKey, encryptionManager.getFriendPublicKey(), true), "Friend", MessageType.SK);
             out.writeObject(sk);
             out.flush();
-
-            System.out.println("SENDER: SENT SESSION KEY");
+            String sess_key = new String(sessionKey, StandardCharsets.UTF_8);
+            System.out.print("SENDER: SENT SESSION KEY - ");
+            System.out.println(sess_key);
 
             while (true) {
                 if(messagesToSend.size() > 0){
@@ -116,7 +117,7 @@ public class SendThread implements Runnable{
 
                         // encrypt message
                         byte[] iv = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-                        msg.encryptPayload(encryptionManager.getSessionKey(), iv,CipherMode.ECB);
+                        msg.encryptPayload(encryptionManager.getSessionKey(),CipherMode.CBC);
 
                         out.writeObject(msg);
                         System.out.println("SENDER: MSG SENT");

@@ -52,7 +52,7 @@ public class EncrytpionManagerTest
 
 
 
-        String data = "Zaszyfrowana wiadomosc";
+        String data = "Zaszyfrowana wiadomosc asd           asedqwr qwbqeqeqwe asd asdasdasdasdouyaspidua psdi asdpoa uspodojuaspdujaso[djua[osdu[aod[oasudu";
 
         byte[] enc = EncryptionManager.encryptAES(data.getBytes(), key, iv, CipherMode.CBC);
 
@@ -105,7 +105,7 @@ public class EncrytpionManagerTest
 
 
 
-        String data = "Zaszyfrowana wiadomosc";
+        String data = "Zaszyfrowana wiadomosc asd              asdasdasfasgasgasgasdasdasfass";
 
         byte[] enc = EncryptionManager.encryptAES(data.getBytes(), key, iv, CipherMode.ECB);
 
