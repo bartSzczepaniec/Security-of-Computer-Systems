@@ -57,7 +57,7 @@ public class EncryptionManager {
     /**
      * Ciphering mode
      */
-    private CipherMode cipherMode; // set according to UI 
+    private CipherMode cipherMode; // set according to UI
 
     public EncryptionManager() {
         friendPublicKey = null;

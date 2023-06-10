@@ -134,7 +134,7 @@ public class ReceiveThread implements Runnable{
                         // decrypt message and put it on list to be read
                         System.out.println("RECEIVER: before decryption: ");
                         System.out.println(new String(msg.getPayload(), StandardCharsets.UTF_8));
-                        msg.decryptPayload(app.getEncryptionManager().getSessionKey(), CipherMode.CBC);
+                        msg.decryptPayload(app.getEncryptionManager().getSessionKey(), encryptionManager.getCipherMode());
                         putMsgOnList(msg);
                 }
 

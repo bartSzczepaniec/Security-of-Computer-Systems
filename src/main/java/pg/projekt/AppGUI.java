@@ -62,6 +62,7 @@ public class AppGUI {
         frame = new JFrame("Security of Computer Systems");
         jFileChooser = new JFileChooser();
         encryptionManager = new EncryptionManager();
+        encryptionManager.setCipherMode(CipherMode.ECB);
         isConnected = false;
     }
 
@@ -205,8 +206,8 @@ public class AppGUI {
     }
 
     public void sendMessage() {
-        //if (cbcRadioButton.isSelected()) {
-        //}
+        if (cbcRadioButton.isSelected()) {
+        }
         //else { // ecb
 
         //}
@@ -334,6 +335,24 @@ public class AppGUI {
                     isConnected = false;
                     setConnectionButtons();
                 }
+            }
+        });
+
+
+        /**
+         * Radio buttons for choosing encryption mode
+         */
+        cbcRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                encryptionManager.setCipherMode(CipherMode.CBC);
+            }
+        });
+
+        ecbRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                encryptionManager.setCipherMode(CipherMode.ECB);
             }
         });
     }

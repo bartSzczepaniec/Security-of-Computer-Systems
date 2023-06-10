@@ -132,7 +132,7 @@ public class SendThread implements Runnable{
                         putMsgOnList(msg);
 
                         // encrypt message
-                        msg.encryptPayload(encryptionManager.getSessionKey(),CipherMode.CBC);
+                        msg.encryptPayload(encryptionManager.getSessionKey(), encryptionManager.getCipherMode());
                         // send the message
                         out.writeObject(msg);
                         System.out.println("SENDER: MSG SENT");
