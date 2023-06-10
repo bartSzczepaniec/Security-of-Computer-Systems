@@ -53,6 +53,12 @@ public class EncryptionManager {
      */
     private volatile byte[] friendPublicKey;
 
+
+    /**
+     * Ciphering mode
+     */
+    private CipherMode cipherMode; // set according to UI 
+
     public EncryptionManager() {
         friendPublicKey = null;
 
