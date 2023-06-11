@@ -40,6 +40,8 @@ public class SendThread implements Runnable{
 
     private EncryptionManager encryptionManager;
 
+    private AppGUI app;
+
     private boolean isInitializer;
     /**
      * creates new thread
@@ -49,7 +51,7 @@ public class SendThread implements Runnable{
      * @param messagesToSend - a list from which to get messages that need to be sent
      * @param encryptionManager - encryption manager to manage keys
      */
-    public SendThread(String address, int port, List<Message> msgList, List<Message> messagesToSend, List<Message> fileMessagesToSend, EncryptionManager encryptionManager, boolean isInitializer){
+    public SendThread(String address, int port, List<Message> msgList, List<Message> messagesToSend, List<Message> fileMessagesToSend, EncryptionManager encryptionManager, boolean isInitializer, AppGUI app){
         this.worker = null;
         this.address = address;
         this.port = port;
@@ -60,6 +62,7 @@ public class SendThread implements Runnable{
         this.running = new AtomicBoolean(false);
         this.encryptionManager = encryptionManager;
         this.isInitializer = isInitializer;
+        this.app = app;
     }
 
     /**
@@ -93,7 +96,7 @@ public class SendThread implements Runnable{
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
             // start confirmation thread
-            ConfirmationThread ct = new ConfirmationThread(in, sentMsgList, encryptionManager);
+            ConfirmationThread ct = new ConfirmationThread(in, sentMsgList, encryptionManager, app);
             ct.start();
 
             // send public key (unencrypted)

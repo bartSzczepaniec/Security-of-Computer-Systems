@@ -106,7 +106,7 @@ public class ReceiveThread implements Runnable{
                     throw new SocketException("Connection refused");
                 }
                 System.out.println("CONNECTED FROM: " + add);
-                this.app.setSendThread(new SendThread(add, 10000, app.getMsgList(), app.getToBeSent(), app.getFileMessagesToBeSent(), encryptionManager, false));
+                this.app.setSendThread(new SendThread(add, 10000, app.getMsgList(), app.getToBeSent(), app.getFileMessagesToBeSent(), encryptionManager, false, app));
                 this.app.getSendThread().start();
                 this.app.setConnected(true);
                 this.app.setConnectionButtons();

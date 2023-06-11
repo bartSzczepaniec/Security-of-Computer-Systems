@@ -195,6 +195,14 @@ public class AppGUI {
         return true;
     }
 
+    public void enableFileButton() {
+        sendFileButton.setEnabled(true);
+    }
+
+    public void disableFileButton() {
+        sendFileButton.setEnabled(false);
+    }
+
     private void enterPort() {
         boolean isPortSet = false;
         try {
@@ -223,6 +231,10 @@ public class AppGUI {
     public void setConnectionButtons(){
         if(isConnected){
             messagesPane.setText("");
+            if(chosenFile != null) {
+                enableFileButton();
+            }
+            sendMessageButton.setEnabled(true);
             connectButton.setEnabled(false);
             disconnectButton.setEnabled(true);
             msgList.removeAll(msgList);
@@ -232,6 +244,8 @@ public class AppGUI {
             connectButton.setEnabled(true);
             disconnectButton.setEnabled(false);
             msgList.add(new Message("Disconnected"));
+            disableFileButton();
+            sendMessageButton.setEnabled(false);
 
         }
 
@@ -259,6 +273,7 @@ public class AppGUI {
              public void actionPerformed(ActionEvent e) {
                  String fileInfo = chosenFile.getName() + ":" + Long.toString(chosenFile.length());
                  System.out.println("FILE INFO  sent: " + fileInfo);
+                 disableFileButton();
                  fileMessagesToBeSent.add(new Message(fileInfo, "Friend", MessageType.INIT_FILE));
 
 
@@ -305,7 +320,7 @@ public class AppGUI {
                 String chosenIP = ipTextField.getText();
                 int chosenPort = Integer.valueOf(portTextField.getText());
                 System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
-                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent, fileMessagesToBeSent, encryptionManager, true);
+                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent, fileMessagesToBeSent, encryptionManager, true, receiveThread.getApp());
                 // TODO: implment is runniong in SendThread (also Receive)
                 sendThread.start();
 

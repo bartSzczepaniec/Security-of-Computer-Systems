@@ -3,6 +3,7 @@ package pg.projekt.sockets.send;
 
 import lombok.Getter;
 import lombok.Setter;
+import pg.projekt.AppGUI;
 import pg.projekt.EncryptionManager;
 import pg.projekt.guiparts.ProgressBarUI;
 import pg.projekt.sockets.messages.Message;
@@ -26,11 +27,14 @@ public class ConfirmationThread implements Runnable{
     private List<Message> sentMsgList;
     private EncryptionManager encryptionManager;
 
-    public ConfirmationThread(ObjectInputStream in, List<Message> sentMsgList, EncryptionManager encryptionManager) {
+    private AppGUI app;
+
+    public ConfirmationThread(ObjectInputStream in, List<Message> sentMsgList, EncryptionManager encryptionManager, AppGUI app) {
         this.in = in;
         this.sentMsgList = sentMsgList;
         this.running = new AtomicBoolean(false);
         this.encryptionManager = encryptionManager;
+        this.app = app;
     }
 
     public void start(){
