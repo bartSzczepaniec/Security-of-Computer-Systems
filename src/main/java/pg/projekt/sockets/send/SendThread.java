@@ -98,7 +98,7 @@ public class SendThread implements Runnable{
 
             // send public key (unencrypted)
             if(isInitializer){
-                Message pk = new Message( new byte[0],"Friend", MessageType.INIT_PK);
+                Message pk = new Message( encryptionManager.getPublicKey(),"Friend", MessageType.INIT_PK);
                 out.writeObject(pk);
                 out.flush();
 
@@ -119,6 +119,16 @@ public class SendThread implements Runnable{
                 String sess_key = new String(sessionKey, StandardCharsets.UTF_8);
                 System.out.print("SENDER: SENT SESSION KEY - ");
                 System.out.println(sess_key);
+
+                // send cipher mode
+
+                Message cipherParams = new Message(EncryptionManager.encryptRSA(encryptionManager.getCipherMode().name().getBytes(), encryptionManager.getFriendPublicKey(), true),"Friend", MessageType.PARAM);
+                out.writeObject(cipherParams);
+                out.flush();
+
+                System.out.println("SENDER: SENT CIPHER PARAMS");
+
+
             }
 
 
@@ -132,13 +142,21 @@ public class SendThread implements Runnable{
                     try{
                         // put the message on sent list
                         putMsgOnList(msg);
+                        if(msg.getType() == MessageType.PARAM){
 
+                            out.writeObject(msg);
+                            out.flush();
+
+                            System.out.println("SENDER: SENT CIPHER PARAMS");
+                        }else{
+                            msg.encryptPayload(encryptionManager.getSessionKey(), encryptionManager.getCipherMode());
+                            // send the message
+                            out.writeObject(msg);
+                            System.out.println("SENDER: MSG SENT");
+                            out.flush();
+                        }
                         // encrypt message
-                        msg.encryptPayload(encryptionManager.getSessionKey(), encryptionManager.getCipherMode());
-                        // send the message
-                        out.writeObject(msg);
-                        System.out.println("SENDER: MSG SENT");
-                        out.flush();
+
                     }catch(ArrayIndexOutOfBoundsException ex){
                         System.err.println("SENDER: invalid message");
                         sentMsgList.add(new Message("Invalid message content"));

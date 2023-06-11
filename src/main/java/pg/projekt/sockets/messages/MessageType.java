@@ -8,5 +8,6 @@ public enum MessageType {
     INFO,
     INIT_PK,
     PK,
-    SK
+    SK,
+    PARAM
 }

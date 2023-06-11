@@ -211,11 +211,7 @@ public class AppGUI {
     }
 
     public void sendMessage() {
-        if (cbcRadioButton.isSelected()) {
-        }
-        //else { // ecb
 
-        //}
         if(!sendMessageField.getText().isEmpty()) {
             String msgToSend = sendMessageField.getText();
             System.out.println("Message sent: " + msgToSend);
@@ -384,7 +380,11 @@ public class AppGUI {
         cbcRadioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 encryptionManager.setCipherMode(CipherMode.CBC);
+
+                Message cipherParams = new Message(EncryptionManager.encryptRSA(encryptionManager.getCipherMode().name().getBytes(), encryptionManager.getFriendPublicKey(), true),"Friend", MessageType.PARAM);
+                toBeSent.add(cipherParams);
             }
         });
 
@@ -392,6 +392,8 @@ public class AppGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 encryptionManager.setCipherMode(CipherMode.ECB);
+                Message cipherParams = new Message(EncryptionManager.encryptRSA(encryptionManager.getCipherMode().name().getBytes(), encryptionManager.getFriendPublicKey(), true),"Friend", MessageType.PARAM);
+                toBeSent.add(cipherParams);
             }
         });
     }

@@ -118,6 +118,8 @@ public class ReceiveThread implements Runnable{
                     // MSG initializing the conversatoion
                     case INIT_PK:
                         System.out.println("RECEIVER: SENDING PK");
+                        // set own public key
+                        encryptionManager.setFriendPublicKey(msg.getPayload());
                         // send Public key in return
                         out.writeObject(new Message(encryptionManager.getPublicKey(),"Friend", MessageType.PK));
                         out.flush();
@@ -133,7 +135,7 @@ public class ReceiveThread implements Runnable{
                         System.out.println(sess_key);
                         break;
                     case INIT_FILE:
-                        msg.decryptPayload(app.getEncryptionManager().getSessionKey(), encryptionManager.getCipherMode());
+                        msg.decryptPayload(encryptionManager.getSessionKey(), encryptionManager.getCipherMode());
                         String fileInfo = new String(msg.getPayload(), StandardCharsets.UTF_8);
                         String[] fileInfoArr = fileInfo.split(":");
 
@@ -144,7 +146,7 @@ public class ReceiveThread implements Runnable{
                         fileSizeLeft = Long.parseLong(fileInfoArr[1]);
                         break;
                     case FILE:
-                        msg.decryptPayload(app.getEncryptionManager().getSessionKey(), encryptionManager.getCipherMode());
+                        msg.decryptPayload(encryptionManager.getSessionKey(), encryptionManager.getCipherMode());
                         //System.out.println("part got: "+new String(msg.getPayload(), StandardCharsets.UTF_8));
                         int sizeToGet = msg.getPayload().length;
                         if (fileSizeLeft < msg.getPayload().length) {
@@ -159,11 +161,23 @@ public class ReceiveThread implements Runnable{
                         }
 
                         break;
+                    case PARAM:
+                        byte[] cipherMode = EncryptionManager.decryptRSA(msg.getPayload(), encryptionManager.getPrivateKey(), false);
+                        String cipherModeString = new String(cipherMode, StandardCharsets.UTF_8);
+                        if(cipherModeString.equals(CipherMode.CBC.name())){
+                            encryptionManager.setCipherMode(CipherMode.CBC);
+                            app.getCbcRadioButton().setSelected(true);
+                        }else if(cipherModeString.equals(CipherMode.ECB.name())){
+                            encryptionManager.setCipherMode(CipherMode.ECB);
+                            app.getEcbRadioButton().setSelected(true);
+                        }
+                        System.out.println("RECEIVER: FRIEND SET CIPHER MODE TO " + cipherModeString);
+                        break;
                     default:
                         // decrypt message and put it on list to be read
                         System.out.println("RECEIVER: before decryption: ");
                         System.out.println(new String(msg.getPayload(), StandardCharsets.UTF_8));
-                        msg.decryptPayload(app.getEncryptionManager().getSessionKey(), encryptionManager.getCipherMode());
+                        msg.decryptPayload(encryptionManager.getSessionKey(), encryptionManager.getCipherMode());
                         putMsgOnList(msg);
                 }
 
