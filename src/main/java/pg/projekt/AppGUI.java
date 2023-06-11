@@ -26,10 +26,8 @@ public class AppGUI {
     private JFrame frame;
     private JPanel mainPanel;
     private JTextField ipTextField;
-    private JTextField portTextField;
     private JButton connectButton;
     private JLabel ipLabel;
-    private JLabel portLabel;
     private JTextPane messagesPane;
     private JLabel chatLabel;
     private JTextField sendMessageField;
@@ -82,7 +80,8 @@ public class AppGUI {
             return;
         }
 
-        enterPort();
+        //enterPort();
+        myPort = 10000;
 
         sendMessageField.addKeyListener(new KeyListener() {
             @Override
@@ -323,7 +322,8 @@ public class AppGUI {
                 setConnectionButtons();
 
                 String chosenIP = ipTextField.getText();
-                int chosenPort = Integer.valueOf(portTextField.getText());
+                //int chosenPort = Integer.valueOf(portTextField.getText());
+                int chosenPort = 10000;
                 System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
                 sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent, fileMessagesToBeSent, encryptionManager, true, receiveThread.getApp());
                 // TODO: implment is runniong in SendThread (also Receive)
