@@ -81,6 +81,7 @@ public class ReceiveThread implements Runnable{
     }
 
 
+    @SneakyThrows
     @Override
     public void run(){
 
@@ -207,6 +208,13 @@ public class ReceiveThread implements Runnable{
 
         this.running.set(false);
         System.out.println("RECEIVER: thread stopped (port: " + port +")");
+        // close send thread asosciated with app
+        if(app.getSendThread().getClientSocket() != null){
+            app.getSendThread().getClientSocket().close();
+        }
+
+        app.setConnected(false);
+        app.setConnectionButtons();
 
     }
 

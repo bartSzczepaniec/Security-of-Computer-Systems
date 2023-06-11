@@ -222,13 +222,17 @@ public class AppGUI {
 
     public void setConnectionButtons(){
         if(isConnected){
+            messagesPane.setText("");
             connectButton.setEnabled(false);
             disconnectButton.setEnabled(true);
             msgList.removeAll(msgList);
             toBeSent.removeAll(toBeSent);
+            msgList.add(new Message("Connected"));
         }else{
             connectButton.setEnabled(true);
             disconnectButton.setEnabled(false);
+            msgList.add(new Message("Disconnected"));
+
         }
 
     }
@@ -297,7 +301,6 @@ public class AppGUI {
                 msgList.removeAll(msgList);
                 toBeSent.removeAll(toBeSent);
                 fileMessagesToBeSent.removeAll(fileMessagesToBeSent);
-                msgList.add(new Message("Connecting..."));
 
                 String chosenIP = ipTextField.getText();
                 int chosenPort = Integer.valueOf(portTextField.getText());
@@ -318,7 +321,6 @@ public class AppGUI {
                 if(sendThread.getRunning().get()){
                     isConnected = true;
                     setConnectionButtons();
-                    msgList.add(new Message("Connected"));
                 }else{
                     isConnected = false;
                     setConnectionButtons();
@@ -343,7 +345,10 @@ public class AppGUI {
 
                 try {
                     // close sockets
-                    sendThread.getClientSocket().close();
+                    if(sendThread.getClientSocket() != null){
+                        sendThread.getClientSocket().close();
+                    }
+
                     if ( receiveThread.getClientSocket() != null){
                         // close client socket if it exists
                         receiveThread.getClientSocket().close();
@@ -359,9 +364,7 @@ public class AppGUI {
                     // toggle connection buttons
                     // TODO: state bool - connected/not connected - based on it button state
                     isConnected = false;
-                    setConnectionButtons();
-                    // Add msg to be displayed
-                    msgList.add(new Message("Disconnected"));
+                    //setConnectionButtons();
 
                 } catch (IOException | NullPointerException | InterruptedException ex) {
                     System.err.println("Closed not existing connection");
