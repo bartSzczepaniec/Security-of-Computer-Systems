@@ -230,6 +230,7 @@ public class AppGUI {
 
     public void setConnectionButtons(){
         if(isConnected){
+            receiveThread.setInitailzer(true);
             messagesPane.setText("");
             if(chosenFile != null) {
                 enableFileButton();
@@ -240,8 +241,10 @@ public class AppGUI {
             disconnectButton.setEnabled(true);
             msgList.removeAll(msgList);
             toBeSent.removeAll(toBeSent);
+            fileMessagesToBeSent.removeAll(fileMessagesToBeSent);
             msgList.add(new Message("Connected"));
         }else{
+            receiveThread.setInitailzer(false);
             messagesPane.setText("");
             msgList.removeAll(msgList);
             toBeSent.removeAll(toBeSent);
@@ -286,7 +289,7 @@ public class AppGUI {
                  // TODO - do it in a different thread
                  FileInputStream fileInputStream = new FileInputStream(chosenFile);
                  long bytesLeft = chosenFile.length();
-                 int partSize = 1024;
+                 int partSize = 1024 * 1024;
 
                  byte[] payload = new byte[partSize];
                  while(fileInputStream.read(payload) != -1)
@@ -317,11 +320,7 @@ public class AppGUI {
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                receiveThread.setInitailzer(true);
-                messagesPane.setText("");
-                msgList.removeAll(msgList);
-                toBeSent.removeAll(toBeSent);
-                fileMessagesToBeSent.removeAll(fileMessagesToBeSent);
+                setConnectionButtons();
 
                 String chosenIP = ipTextField.getText();
                 int chosenPort = Integer.valueOf(portTextField.getText());
@@ -329,26 +328,6 @@ public class AppGUI {
                 sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent, fileMessagesToBeSent, encryptionManager, true, receiveThread.getApp());
                 // TODO: implment is runniong in SendThread (also Receive)
                 sendThread.start();
-
-
-                // TODO: check if connection succesful
-                // TODO: something displayed under buttons
-                // TODO: block horizontal scorlling
-                /*try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
-                }*/
-                /*if(sendThread.getRunning().get()){
-                    isConnected = true;
-                    setConnectionButtons();
-                }else{
-                    isConnected = false;
-                    setConnectionButtons();
-                }*/
-
-
-
 
 
             }
