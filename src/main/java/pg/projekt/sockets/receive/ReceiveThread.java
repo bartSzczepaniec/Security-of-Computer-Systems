@@ -103,6 +103,7 @@ public class ReceiveThread implements Runnable{
                 int result = JOptionPane.showConfirmDialog(null, add,
                         "New connection incoming", JOptionPane.OK_CANCEL_OPTION);
                 if(result == 2){
+
                     throw new SocketException("Connection refused");
                 }
                 System.out.println("CONNECTED FROM: " + add);
@@ -225,9 +226,16 @@ public class ReceiveThread implements Runnable{
             throw new RuntimeException(e);
         }finally {
             try { // close gently
-                out.close();
-                in.close();
-                clientSocket.close();
+                if(out != null){
+                    out.close();
+                }
+                if(in != null){
+                    in.close();
+                }
+                if(clientSocket != null && !clientSocket.isClosed()){
+                    clientSocket.close();
+                }
+
                 System.out.println("RECEIVER: closing gently");
             } catch (IOException | NullPointerException e) {
                 System.err.println(e);

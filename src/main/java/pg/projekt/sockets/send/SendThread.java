@@ -15,9 +15,7 @@ import pg.projekt.sockets.messages.MsgReader;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -91,7 +89,11 @@ public class SendThread implements Runnable{
         ObjectInputStream in = null;
         try{
             // create new socket
-            clientSocket = new Socket(address, port);
+            clientSocket = new Socket();
+            SocketAddress socketAddress = new InetSocketAddress(address, port);
+            clientSocket.connect(socketAddress, 5000);
+
+
             // init in/out streams
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
@@ -107,9 +109,18 @@ public class SendThread implements Runnable{
 
                 // wait for response from other side
                 // TODO: timeout?
+
+                int counter = 0;
                 while(encryptionManager.getFriendPublicKey() == null){
                     Thread.sleep(500);
+                    System.out.println("WAITING");
+                    if(counter++ > 10){
+                        throw new InterruptedException("Connection timed out");
+                    }
+
                 }
+                app.setConnected(true);
+                app.setConnectionButtons();
                 System.out.println("SENDER: RECEIVED PUBLIC KEY");
 
                 // sending encrypted session key (RSA)
@@ -193,6 +204,7 @@ public class SendThread implements Runnable{
         } catch (NullPointerException | IOException | InterruptedException ex)
         {
             System.err.println("SENDER: connection closed by other side or no open socket present - communication terminated");
+            app.setConnectionButtons();
             System.err.println(ex);
         } finally {
             try {
@@ -208,5 +220,7 @@ public class SendThread implements Runnable{
 
         this.running.set(false);
         System.out.println("SENDER: thread stopped (addres: " + address + ", port: " + port +")");
+        //app.setConnected(false);
+        //app.setConnectionButtons();
     }
 }
