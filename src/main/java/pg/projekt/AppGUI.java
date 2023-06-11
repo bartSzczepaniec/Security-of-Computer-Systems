@@ -241,6 +241,9 @@ public class AppGUI {
             toBeSent.removeAll(toBeSent);
             msgList.add(new Message("Connected"));
         }else{
+            messagesPane.setText("");
+            msgList.removeAll(msgList);
+            toBeSent.removeAll(toBeSent);
             connectButton.setEnabled(true);
             disconnectButton.setEnabled(false);
             msgList.add(new Message("Disconnected"));
@@ -328,18 +331,18 @@ public class AppGUI {
                 // TODO: check if connection succesful
                 // TODO: something displayed under buttons
                 // TODO: block horizontal scorlling
-                try {
+                /*try {
                     Thread.sleep(2000);
                 } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
-                }
-                if(sendThread.getRunning().get()){
+                }*/
+                /*if(sendThread.getRunning().get()){
                     isConnected = true;
                     setConnectionButtons();
                 }else{
                     isConnected = false;
                     setConnectionButtons();
-                }
+                }*/
 
 
 
