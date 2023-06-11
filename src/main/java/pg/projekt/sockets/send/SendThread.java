@@ -34,6 +34,7 @@ public class SendThread implements Runnable{
     private String address;
     private List<Message> sentMsgList;
     private List<Message> messagesToSend;
+    private List<Message> fileMessagesToSend;
     private Socket clientSocket;
     private AtomicBoolean running;
 
@@ -48,12 +49,13 @@ public class SendThread implements Runnable{
      * @param messagesToSend - a list from which to get messages that need to be sent
      * @param encryptionManager - encryption manager to manage keys
      */
-    public SendThread(String address, int port, List<Message> msgList, List<Message> messagesToSend, EncryptionManager encryptionManager, boolean isInitializer){
+    public SendThread(String address, int port, List<Message> msgList, List<Message> messagesToSend, List<Message> fileMessagesToSend, EncryptionManager encryptionManager, boolean isInitializer){
         this.worker = null;
         this.address = address;
         this.port = port;
         this.sentMsgList = msgList;
         this.messagesToSend = messagesToSend;
+        this.fileMessagesToSend = fileMessagesToSend;
         this.clientSocket = null;
         this.running = new AtomicBoolean(false);
         this.encryptionManager = encryptionManager;
@@ -142,6 +144,22 @@ public class SendThread implements Runnable{
                         sentMsgList.add(new Message("Invalid message content"));
                     }
 
+                }
+                else if(fileMessagesToSend.size() > 0) {
+                    // remove it from the list
+                    Message msg = fileMessagesToSend.remove(0);
+
+                    try{
+                        // encrypt message
+                        //System.out.println("part sent: "+new String(msg.getPayload(), StandardCharsets.UTF_8));
+                        msg.encryptPayload(encryptionManager.getSessionKey(), encryptionManager.getCipherMode());
+                        // send the message
+                        out.writeObject(msg);
+                        out.flush();
+                    }catch(ArrayIndexOutOfBoundsException ex){
+                        System.err.println("SENDER: invalid message");
+                        sentMsgList.add(new Message("Invalid message content"));
+                    }
                 }
 
                 Thread.sleep(200);

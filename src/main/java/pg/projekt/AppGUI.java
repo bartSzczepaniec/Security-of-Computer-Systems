@@ -3,7 +3,9 @@ package pg.projekt;
 import com.google.common.hash.HashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 import pg.projekt.sockets.messages.Message;
+import pg.projekt.sockets.messages.MessageType;
 import pg.projekt.sockets.messages.MsgReader;
 import pg.projekt.sockets.receive.ReceiveThread;
 import pg.projekt.sockets.receive.CheckThread;
@@ -12,12 +14,11 @@ import pg.projekt.sockets.send.SendThread;
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 @Getter
 @Setter
@@ -47,6 +48,7 @@ public class AppGUI {
 
     private List<Message> msgList;
     private List<Message> toBeSent;
+    private List<Message> fileMessagesToBeSent;
 
     private ReceiveThread receiveThread;
     private SendThread sendThread;
@@ -57,6 +59,7 @@ public class AppGUI {
 
     private boolean isConnected;
 
+    private File chosenFile;
 
     public AppGUI() {
         frame = new JFrame("Security of Computer Systems");
@@ -64,6 +67,7 @@ public class AppGUI {
         encryptionManager = new EncryptionManager();
         encryptionManager.setCipherMode(CipherMode.ECB);
         isConnected = false;
+        chosenFile = null;
     }
 
     public void startApp() {
@@ -120,6 +124,7 @@ public class AppGUI {
 
         this.msgList = Collections.synchronizedList(new ArrayList<Message>());
         this.toBeSent = Collections.synchronizedList(new ArrayList<Message>());
+        this.fileMessagesToBeSent = Collections.synchronizedList(new ArrayList<Message>());
 
         this.receiveThread = new ReceiveThread(msgList, myPort, this);
         this.receiveThread.start();
@@ -239,12 +244,45 @@ public class AppGUI {
                 int result = jFileChooser.showOpenDialog(null);
 
                 if(result == JFileChooser.APPROVE_OPTION) {
-                    File chosenFile = jFileChooser.getSelectedFile();
+                    chosenFile = jFileChooser.getSelectedFile();
                     // TODO - handle file
-                    fileLabel.setText(chosenFile.getName());
+                    fileLabel.setText("File: " + chosenFile.getName());
+                    System.out.println(chosenFile.length());
+                    sendFileButton.setEnabled(true);
                 }
             }
         });
+
+        sendFileButton.addActionListener(new ActionListener() {
+             @SneakyThrows
+             @Override
+             public void actionPerformed(ActionEvent e) {
+                 String fileInfo = chosenFile.getName() + ":" + Long.toString(chosenFile.length());
+                 System.out.println("FILE INFO  sent: " + fileInfo);
+                 fileMessagesToBeSent.add(new Message(fileInfo, "Friend", MessageType.INIT_FILE));
+
+
+                 // TODO - do it in a different thread
+                 FileInputStream fileInputStream = new FileInputStream(chosenFile);
+                 long bytesLeft = chosenFile.length();
+                 int partSize = 1024;
+
+                 byte[] payload = new byte[partSize];
+                 while(fileInputStream.read(payload) != -1)
+                 {
+                     byte[] payloadToSend = Arrays.copyOf(payload, partSize);
+                     Message filePart = new Message(payloadToSend, "Friend", MessageType.FILE);
+                     //System.out.println("F - part sent: "+new String(filePart.getPayload(), StandardCharsets.UTF_8));
+                     fileMessagesToBeSent.add(filePart);
+                 }
+                 fileInputStream.close();
+
+
+                 fileLabel.setText("File:");
+                 sendFileButton.setEnabled(false);
+                 chosenFile = null;
+             }
+         });
 
         // Sending a Text message
         sendMessageButton.addActionListener(new ActionListener() {
@@ -262,12 +300,13 @@ public class AppGUI {
                 messagesPane.setText("");
                 msgList.removeAll(msgList);
                 toBeSent.removeAll(toBeSent);
+                fileMessagesToBeSent.removeAll(fileMessagesToBeSent);
                 msgList.add(new Message("Connecting..."));
 
                 String chosenIP = ipTextField.getText();
                 int chosenPort = Integer.valueOf(portTextField.getText());
                 System.out.println("Connecting with: IP: " + chosenIP + " Port: " + chosenPort);
-                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent, encryptionManager, true);
+                sendThread = new SendThread(chosenIP, chosenPort, msgList, toBeSent, fileMessagesToBeSent, encryptionManager, true);
                 // TODO: implment is runniong in SendThread (also Receive)
                 sendThread.start();
 

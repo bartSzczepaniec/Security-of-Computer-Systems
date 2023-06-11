@@ -87,6 +87,8 @@ public class ReceiveThread implements Runnable{
         // init streams
         ObjectOutputStream out = null;
         ObjectInputStream in = null;
+        FileOutputStream fileOutputStream = null;
+        long fileSizeLeft = 0;
         try
         {
             clientSocket = serverSocket.accept();
@@ -95,7 +97,7 @@ public class ReceiveThread implements Runnable{
             if(!isInitailzer){
                 String add = ((InetSocketAddress)clientSocket.getRemoteSocketAddress()).getAddress().getHostAddress();
                 System.out.println("CONNECTED FROM: " + add);
-                this.app.setSendThread(new SendThread(add, 10000, app.getMsgList(), app.getToBeSent(), encryptionManager, false));
+                this.app.setSendThread(new SendThread(add, 10000, app.getMsgList(), app.getToBeSent(), app.getFileMessagesToBeSent(), encryptionManager, false));
                 this.app.getSendThread().start();
                 this.app.setConnected(true);
                 this.app.setConnectionButtons();
@@ -129,6 +131,33 @@ public class ReceiveThread implements Runnable{
                         String sess_key = new String(sessionKey, StandardCharsets.UTF_8);
                         System.out.print("RECEIVER: RECEIVED SESSION KEY - ");
                         System.out.println(sess_key);
+                        break;
+                    case INIT_FILE:
+                        msg.decryptPayload(app.getEncryptionManager().getSessionKey(), encryptionManager.getCipherMode());
+                        String fileInfo = new String(msg.getPayload(), StandardCharsets.UTF_8);
+                        String[] fileInfoArr = fileInfo.split(":");
+
+                        System.out.println("NEW FILE COMING NAME - " + fileInfoArr[0]);
+                        System.out.println("NEW FILE COMING SIZE - " + fileInfoArr[1]);
+                        File uploadedFile = new File("src/main/resources/downloads/"+fileInfoArr[0]);
+                        fileOutputStream = new FileOutputStream(uploadedFile);
+                        fileSizeLeft = Long.parseLong(fileInfoArr[1]);
+                        break;
+                    case FILE:
+                        msg.decryptPayload(app.getEncryptionManager().getSessionKey(), encryptionManager.getCipherMode());
+                        //System.out.println("part got: "+new String(msg.getPayload(), StandardCharsets.UTF_8));
+                        int sizeToGet = msg.getPayload().length;
+                        if (fileSizeLeft < msg.getPayload().length) {
+                            sizeToGet = (int) fileSizeLeft;
+                        }
+                        fileOutputStream.write(msg.getPayload(), 0, sizeToGet);
+                        fileSizeLeft -= sizeToGet;
+                        System.out.println("r - " + fileSizeLeft);
+                        if(!(fileSizeLeft > 0)) {
+                            System.out.println("GOT WHOLE FILE");
+                            fileOutputStream.close();
+                        }
+
                         break;
                     default:
                         // decrypt message and put it on list to be read
