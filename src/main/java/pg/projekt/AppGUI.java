@@ -234,6 +234,7 @@ public class AppGUI {
             if(chosenFile != null) {
                 enableFileButton();
             }
+            fileChooseButton.setEnabled(true);
             sendMessageButton.setEnabled(true);
             connectButton.setEnabled(false);
             disconnectButton.setEnabled(true);
@@ -245,6 +246,7 @@ public class AppGUI {
             disconnectButton.setEnabled(false);
             msgList.add(new Message("Disconnected"));
             disableFileButton();
+            fileChooseButton.setEnabled(false);
             sendMessageButton.setEnabled(false);
 
         }
@@ -274,6 +276,7 @@ public class AppGUI {
                  String fileInfo = chosenFile.getName() + ":" + Long.toString(chosenFile.length());
                  System.out.println("FILE INFO  sent: " + fileInfo);
                  disableFileButton();
+                 fileChooseButton.setEnabled(false);
                  fileMessagesToBeSent.add(new Message(fileInfo, "Friend", MessageType.INIT_FILE));
 
 

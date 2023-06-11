@@ -71,6 +71,9 @@ public class ConfirmationThread implements Runnable{
                         String bytesLeft = new String(msg.getPayload(), StandardCharsets.UTF_8);
                         long fileSizeLeft = Long.parseLong(bytesLeft);
                         progressBarUI.updateProgress(fileSizeLeft);
+                        if(!(fileSizeLeft > 0)) {
+                            app.getFileChooseButton().setEnabled(true);
+                        }
                         break;
                     default:
                         putConfirmationOnList(msg);
