@@ -4,6 +4,7 @@ package pg.projekt.sockets.send;
 import lombok.Getter;
 import lombok.Setter;
 import pg.projekt.EncryptionManager;
+import pg.projekt.guiparts.ProgressBarUI;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
 
@@ -43,6 +44,8 @@ public class ConfirmationThread implements Runnable{
     public void run() {
         try {
             Object input;
+            ProgressBarUI progressBarUI = null;
+
             while ((input = in.readObject()) != null) {
                 // Read object from stream
                 Message msg = (Message) input;
@@ -51,6 +54,19 @@ public class ConfirmationThread implements Runnable{
                         byte[] friendPublicKey = msg.getPayload();
                         encryptionManager.setFriendPublicKey(friendPublicKey);
                         System.out.println("CONFIRMATION THREAD: RECEIVED PK");
+                        break;
+                    case CONFIRM_INIT_FILE:
+                        String fileInfo = new String(msg.getPayload(), StandardCharsets.UTF_8);
+                        String[] fileInfoArr = fileInfo.split(":");
+                        String fileName = fileInfoArr[0];
+                        long sizeOfFile = Long.parseLong(fileInfoArr[1]);
+                        progressBarUI = new ProgressBarUI(sizeOfFile, fileName, false);
+                        progressBarUI.startProgressBar();
+                        break;
+                    case CONFIRM_FILE:
+                        String bytesLeft = new String(msg.getPayload(), StandardCharsets.UTF_8);
+                        long fileSizeLeft = Long.parseLong(bytesLeft);
+                        progressBarUI.updateProgress(fileSizeLeft);
                         break;
                     default:
                         putConfirmationOnList(msg);

@@ -4,6 +4,7 @@ import lombok.*;
 import pg.projekt.AppGUI;
 import pg.projekt.CipherMode;
 import pg.projekt.EncryptionManager;
+import pg.projekt.guiparts.ProgressBarUI;
 import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
 import pg.projekt.sockets.send.SendThread;
@@ -117,6 +118,10 @@ public class ReceiveThread implements Runnable{
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
 
+
+            // init progressbar for file receiving
+            ProgressBarUI progressBarUI = null;
+
             Object input;
             while ((input = in.readObject()) != null) {
                 // Read object from stream
@@ -146,12 +151,21 @@ public class ReceiveThread implements Runnable{
                         msg.decryptPayload(encryptionManager.getSessionKey(), encryptionManager.getCipherMode());
                         String fileInfo = new String(msg.getPayload(), StandardCharsets.UTF_8);
                         String[] fileInfoArr = fileInfo.split(":");
+                        String fileName = fileInfoArr[0];
 
                         System.out.println("NEW FILE COMING NAME - " + fileInfoArr[0]);
                         System.out.println("NEW FILE COMING SIZE - " + fileInfoArr[1]);
                         File uploadedFile = new File("src/main/resources/downloads/"+fileInfoArr[0]);
                         fileOutputStream = new FileOutputStream(uploadedFile);
                         fileSizeLeft = Long.parseLong(fileInfoArr[1]);
+
+                        progressBarUI = new ProgressBarUI(fileSizeLeft, fileName, true);
+                        progressBarUI.startProgressBar();
+                        // send confirmation of file sending initialization
+                        Message fileInitConfirmation = new Message(fileInfo, "Friend", MessageType.CONFIRM_INIT_FILE);
+                        out.writeObject(fileInitConfirmation);
+                        out.flush();
+
                         break;
                     case FILE:
                         msg.decryptPayload(encryptionManager.getSessionKey(), encryptionManager.getCipherMode());
@@ -162,11 +176,18 @@ public class ReceiveThread implements Runnable{
                         }
                         fileOutputStream.write(msg.getPayload(), 0, sizeToGet);
                         fileSizeLeft -= sizeToGet;
+
+                        progressBarUI.updateProgress(fileSizeLeft);
+
                         System.out.println("r - " + fileSizeLeft);
                         if(!(fileSizeLeft > 0)) {
                             System.out.println("GOT WHOLE FILE");
                             fileOutputStream.close();
                         }
+                        // send confirmation of receiving part of the file
+                        Message fileConfirmation = new Message("" + fileSizeLeft, "Friend", MessageType.CONFIRM_FILE);
+                        out.writeObject(fileConfirmation);
+                        out.flush();
 
                         break;
                     case PARAM:

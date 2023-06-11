@@ -9,5 +9,7 @@ public enum MessageType {
     INIT_PK,
     PK,
     SK,
-    PARAM
+    PARAM,
+    CONFIRM_INIT_FILE,
+    CONFIRM_FILE
 }
