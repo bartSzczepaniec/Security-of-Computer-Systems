@@ -8,6 +8,7 @@ import pg.projekt.sockets.messages.Message;
 import pg.projekt.sockets.messages.MessageType;
 import pg.projekt.sockets.send.SendThread;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -96,7 +97,13 @@ public class ReceiveThread implements Runnable{
             // TODO: accept or reject connection
             // TODO: tworzy sendthread'a
             if(!isInitailzer){
+
                 String add = ((InetSocketAddress)clientSocket.getRemoteSocketAddress()).getAddress().getHostAddress();
+                int result = JOptionPane.showConfirmDialog(null, add,
+                        "New connection incoming", JOptionPane.OK_CANCEL_OPTION);
+                if(result == 2){
+                    throw new SocketException("Connection refused");
+                }
                 System.out.println("CONNECTED FROM: " + add);
                 this.app.setSendThread(new SendThread(add, 10000, app.getMsgList(), app.getToBeSent(), app.getFileMessagesToBeSent(), encryptionManager, false));
                 this.app.getSendThread().start();
@@ -209,7 +216,7 @@ public class ReceiveThread implements Runnable{
         this.running.set(false);
         System.out.println("RECEIVER: thread stopped (port: " + port +")");
         // close send thread asosciated with app
-        if(app.getSendThread().getClientSocket() != null){
+        if(app.getSendThread() != null && app.getSendThread().getClientSocket() != null){
             app.getSendThread().getClientSocket().close();
         }
 
