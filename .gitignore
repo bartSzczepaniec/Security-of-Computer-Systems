@@ -1,8 +1,9 @@
 target/
 .idea/
 **/encryptionKey/
-**/privateKeys/
-**/publicKeys/
+**/privateKey/
+**/publicKey/
+**/downloads/
 *.iml
 pom.xml.tag
 pom.xml.releaseBackup
