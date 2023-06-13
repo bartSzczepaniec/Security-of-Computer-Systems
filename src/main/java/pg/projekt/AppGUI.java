@@ -319,7 +319,11 @@ public class AppGUI {
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                setConnectionButtons();
+                receiveThread.setInitailzer(true);
+                messagesPane.setText("");
+                msgList.removeAll(msgList);
+                toBeSent.removeAll(toBeSent);
+                fileMessagesToBeSent.removeAll(fileMessagesToBeSent);
 
                 String chosenIP = ipTextField.getText();
                 //int chosenPort = Integer.valueOf(portTextField.getText());
