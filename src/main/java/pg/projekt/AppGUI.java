@@ -288,7 +288,7 @@ public class AppGUI {
                  // TODO - do it in a different thread
                  FileInputStream fileInputStream = new FileInputStream(chosenFile);
                  long bytesLeft = chosenFile.length();
-                 int partSize = 1024 * 1024;
+                 int partSize = 1024;
 
                  byte[] payload = new byte[partSize];
                  while(fileInputStream.read(payload) != -1)
@@ -375,7 +375,6 @@ public class AppGUI {
                 }
             }
         });
-
 
         /**
          * Radio buttons for choosing encryption mode

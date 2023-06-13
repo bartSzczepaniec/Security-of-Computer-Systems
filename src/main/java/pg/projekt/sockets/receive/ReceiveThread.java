@@ -102,7 +102,7 @@ public class ReceiveThread implements Runnable{
                 String add = ((InetSocketAddress)clientSocket.getRemoteSocketAddress()).getAddress().getHostAddress();
                 int result = JOptionPane.showConfirmDialog(null, add,
                         "New connection incoming", JOptionPane.OK_CANCEL_OPTION);
-                if(result == 2){
+                if(result != 0){
 
                     throw new SocketException("Connection refused");
                 }
